@@ -2,7 +2,7 @@
   "miniprogramRoot": "dist/",
   "projectname": "taro-init",
   "description": "taro-init",
-  "appid": "touristappid",
+  "appid": "wxd8103b355b8df237",
   "setting": {
     "urlCheck": false,
     "es6": false,
@@ -21,20 +21,22 @@
     "checkSiteMap": true,
     "uploadWithSourceMap": true,
     "compileHotReLoad": false,
-    "useMultiFrameRuntime": false,
+    "lazyloadPlaceholderEnable": false,
+    "useMultiFrameRuntime": true,
     "useApiHook": true,
+    "useApiHostProcess": true,
     "babelSetting": {
       "ignore": [],
       "disablePlugins": [],
       "outputPath": ""
     },
-    "bundle": true,
+    "enableEngineNative": false,
     "useIsolateContext": true,
-    "useCompilerModule": true,
-    "userConfirmedUseCompilerModuleSwitch": false,
+    "userConfirmedBundleSwitch": false,
     "packNpmManually": false,
     "packNpmRelationList": [],
-    "minifyWXSS": true
+    "minifyWXSS": true,
+    "showES6CompileOption": false
   },
   "compileType": "miniprogram",
   "simulatorType": "wechat",

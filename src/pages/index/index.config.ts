@@ -1,3 +1,4 @@
 export default {
-  navigationBarTitleText: '首页',
+  enablePullDownRefresh: true,
+  navigationBarTitleText: '智建交付',
 }

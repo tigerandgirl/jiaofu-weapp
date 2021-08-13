@@ -42,9 +42,21 @@ class fetch {
     return request(option)
   }
 
-  post(url: string, data: any) {
-    let params = { url, data }
+  get(url: string, data) {
+    let option = { url, data }
+    return this.baseOptions(option)
+  }
+  post(url: string, data, contentType) {
+    let params = { url, data, contentType }
     return this.baseOptions(params, 'POST')
+  }
+  put(url: string, data) {
+    let option = { url, data }
+    return this.baseOptions(option, 'PUT')
+  }
+  delete(url: string, data) {
+    let option = { url, data }
+    return this.baseOptions(option, 'DELETE')
   }
 }
 

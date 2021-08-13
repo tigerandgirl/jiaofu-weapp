@@ -18,7 +18,7 @@ export const pageToLogin = (): void => {
   let path = getCurrentPageUrl()
   if (!path.includes('login')) {
     navigateTo({
-      url: '/pages/login/login',
+      url: '/pages/login/index',
     })
   }
 }

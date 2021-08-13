@@ -1,9 +1,12 @@
 import React, { Component } from 'react'
-// import { connect } from 'react-redux'
+import { connect } from 'react-redux'
 import { View, Text, Image } from '@tarojs/components'
 import { AtButton, AtDivider } from 'taro-ui'
+import { TaroVirtualList } from 'taro-virtual-list'
+
 import { styled } from 'linaria/react'
 
+import dxk from '../../assets/images/dxk.jpg'
 import './style.styl'
 
 // #region 书写注意
@@ -16,100 +19,106 @@ import './style.styl'
 //
 // #endregion
 
-type PageStateProps = {}
+type PageStateProps = {
+  dispatch: Function
+}
+
 type PageOwnProps = {}
 type PageState = {}
-type IProps = PageStateProps & PageOwnProps
+type IProps = PageStateProps
 
 interface Index {
   props: IProps
 }
 
-const BtnGroup = styled(View)<{
-  color: string
-}>`
-  color: ${props => props.color};
-  background-color: #999;
-  > .at-button--small {
-    display: inline-block;
-    margin: 10%;
-  }
-`
-
-// @connect(
-//   ({ counter }) => ({
-//     counter,
-//   }),
-//   dispatch => ({
-//     add() {
-//       dispatch(add())
-//     },
-//     dec() {
-//       dispatch(minus())
-//     },
-//     asyncAdd() {
-//       dispatch(asyncAdd())
-//     },
-//   })
-// )
+@connect(
+  state => ({
+    state,
+  }),
+  dispatch => ({
+    dispatch,
+  })
+)
 class Index extends Component {
+  constructor(props) {
+    super(props)
+  }
+
   // componentWillReceiveProps(nextProps) {
   //   console.log(this.props, nextProps)
   // }
-
   componentWillUnmount() {}
   componentDidShow() {}
   componentDidHide() {}
+  componentDidMount() {
+    this.getProjectPageList()
+  }
+
+  getProjectPageList = () => {
+    const { dispatch } = this.props
+    dispatch({
+      type: 'index/fetch',
+      payload: {
+        text: '',
+        state: 0,
+        orderType: 0,
+        parentId: null,
+        pageIndex: 1,
+        pageSize: 10,
+      },
+    })
+  }
+
+  renderFunc = (item, index, pageIndex) => {
+    return (
+      <View key={index} className="home_list">
+        <Image
+          className="home_img"
+          style="width: 100%;height: 140px; "
+          src={dxk}
+        />
+        <View className="home_title">
+          <Text>中铁隧道局林芝川藏铁路2标展厅项目</Text>
+        </View>
+      </View>
+    )
+  }
+
+  handleBottom = () => {
+    console.log('触底了')
+  }
+
+  handleComplete = () => {
+    console.log('加载完成')
+  }
 
   render() {
+    const list = [
+      { name: 'tiger' },
+      { name: 'tiger' },
+      { name: 'tiger' },
+      { name: 'tiger' },
+      { name: 'tiger' },
+      { name: 'tiger' },
+      { name: 'tiger' },
+      { name: 'tiger' },
+      { name: 'tiger' },
+      { name: 'tiger' },
+      { name: 'tiger' },
+    ]
     return (
       <View className="index">
-        <View className="at-article">
-          <View className="at-article__h1">elf-taro-cli</View>
-          <View className="at-article__info">基于 Taro的小程序脚手架</View>
-          <View className="at-article__content">
-            <View className="at-article__section">
-              <View className="at-article__h2">“首页” 功能介绍</View>
-              <View className="at-article__h3">
-                Taro-UI 与 CSS in JS样式方案
-              </View>
-              <Image
-                className="at-article__img"
-                src="http://storage.360buyimg.com/mtd/home/32443566_635798770100444_2113947400891531264_n1533825816008.jpg"
-                mode="widthFix"
-              />
-              <View className="at-article__p">
-                使用 CSS in JS 修改 文字颜色
-              </View>
-              <BtnGroup color="red">
-                <Text>文字颜色</Text>
-                <View>
-                  <AtButton type="primary" size="small" className="index--btn">
-                    按钮A
-                  </AtButton>
-                  <AtButton
-                    type="secondary"
-                    size="small"
-                    className="index--btn"
-                  >
-                    按钮B
-                  </AtButton>
-                </View>
-              </BtnGroup>
-
-              <AtDivider content="“计数” 功能介绍" />
-              <View className="at-article__p">基于Dva的计数器</View>
-
-              <AtDivider content="“数据” 功能介绍" />
-              <View className="at-article__p">
-                基于Dva与request的异步请求demo
-              </View>
-
-              <AtDivider content="“地图” 功能介绍" />
-              <View className="at-article__p">基于腾讯地图的地图功能</View>
-            </View>
-          </View>
-        </View>
+        <TaroVirtualList
+          list={list}
+          onRender={this.renderFunc}
+          onBottom={this.handleBottom}
+          onComplete={this.handleComplete}
+          scrollViewProps={{
+            style: {
+              height: '100vh',
+            },
+          }}
+        />
       </View>
     )
   }
