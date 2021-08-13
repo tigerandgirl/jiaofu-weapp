@@ -1,14 +1,15 @@
 /*
- * @Author: yanxiaodi
+ * @Author: qiufh
  * @Date: 2020-09-14 19:44:38
- * @Last Modified by: yanxiaodi
+ * @Last Modified by: qiufh
  * @Last Modified time: 2020-09-17 18:12:39
  */
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
+import Taro from '@tarojs/taro'
 import { View, Text, Image } from '@tarojs/components'
 import { AtButton, AtList, AtListItem, AtCard } from 'taro-ui'
-import isArray from 'lodash/isArray'
+import moment from 'moment'
 import { TaroVirtualList } from 'taro-virtual-list'
 
 import u1366 from '../../assets/images/u1366.png'
@@ -17,58 +18,101 @@ import './style.styl'
 
 type PageStateProps = {
   dispatch: Function
-  asyncData: any
+  daily: any
 }
-type PageDispatchProps = {
-  getAsyncData: () => void
-  initAsyncData: () => void
-}
-type IProps = PageStateProps & PageDispatchProps
 
-interface Data {
+type IProps = PageStateProps
+
+interface Daily {
   props: IProps
 }
 
 @connect(
   state => ({
-    asyncData: state.data.asyncData,
+    daily: state.daily,
   }),
   dispatch => ({
-    getAsyncData(): void {
-      dispatch({
-        type: 'data/fetch',
-      })
-    },
-    initAsyncData(): void {
-      dispatch({
-        type: 'data/init',
-      })
-    },
+    dispatch,
   })
 )
-class Data extends Component {
+class Daily extends Component {
+  constructor(props) {
+    super(props)
+  }
+
+  getTodayContentInfo = item => {
+    if (item.contents.length >= 2) {
+      return `${item.contents[0]['position']}${item.contents[0]['productCategory']}完成${item.contents[0]['actualProgress']}%，${item.contents[1]['position']}${item.contents[1]['productCategory']}完成${item.contents[1]['actualProgress']}%`
+    }
+    if (item.contents.length > 0) {
+      return `${item.contents[0]['position']}${item.contents[0]['productCategory']}完成${item.contents[0]['actualProgress']}%`
+    }
+  }
+
+  getProgressStateInfo = state => {
+    let info = ''
+    if (state === 0) {
+      info = '正常'
+    }
+    if (state === 1) {
+      info = '提前'
+    }
+    if (state === 2) {
+      info = '延迟'
+    }
+    return info
+  }
+
+  getDailyById = params => {
+    const { dispatch } = this.props
+    dispatch({
+      type: 'daily/getDailyById',
+      payload: params,
+    })
+    Taro.navigateTo({
+      url: '/pages/daily/dailyview',
+    })
+  }
+
   renderFunc = (item, index, pageIndex) => {
     return (
       <View key={index} className="daily-list">
-        <View className="daily-item">
+        <View
+          className="daily-item"
+          onClick={() => {
+            this.getDailyById({ id: item.id })
+          }}
+        >
           <View className="daily-up">
-            <Image
-              className="home_img"
-              style="width: 110px;min-width:110px;height: 80px"
-              src={u1366}
-            />
+            {item.dailyDocuments.length > 0 &&
+            item.dailyDocuments[0]['fileUrl'] !== null ? (
+              <Image
+                className="home_img"
+                style="width: 110px;min-width:110px;height: 80px"
+                src={item.dailyDocuments[0]['fileUrl']}
+              />
+            ) : (
+              <Image
+                className="home_img"
+                style="width: 110px;min-width:110px;height: 80px"
+                src={u1366}
+              />
+            )}
             <View className="daily-desc">
               <View className="daily-title">
-                <Text>2021-07-26 日报</Text>
+                <Text>{item.title}</Text>
               </View>
               <View className="daily-sub">
-                <Text>xxxxxxxxxxxxxxxxxxxxxxxxxxx</Text>
+                <Text>{this.getTodayContentInfo(item)}</Text>
               </View>
             </View>
           </View>
           <View className="daily-down">
             <Text className="daily-author-date">
-              {'邱风虎'} {'2021-11-11 11:11'}
+              {item.createUserName === null ? '' : item.createUserName}{' '}
+              {item.createTime !== 0
+                ? moment(item.createTime).format('YYYY.MM.DD HH:mm:ss')
+                : ''}
             </Text>
             <View
               style={{
@@ -80,7 +124,9 @@ class Data extends Component {
               }}
             >
               <Text style={{ color: '#333' }}>进度: </Text>
-              <Text style={{ color: '#F59A23' }}>{'延迟'}</Text>
+              <Text style={{ color: '#F59A23' }}>
+                {this.getProgressStateInfo(item.progressState)}
+              </Text>
             </View>
           </View>
         </View>
@@ -97,24 +143,12 @@ class Data extends Component {
   }
 
   render() {
-    const { asyncData } = this.props
-    const list = [
-      { name: 'tiger' },
-      { name: 'tiger' },
-      { name: 'tiger' },
-      { name: 'tiger' },
-      { name: 'tiger' },
-      { name: 'tiger' },
-      { name: 'tiger' },
-      { name: 'tiger' },
-      { name: 'tiger' },
-      { name: 'tiger' },
-      { name: 'tiger' },
-    ]
+    const { daily } = this.props
+    const { dailyList } = daily
     return (
       <View className="data">
         <TaroVirtualList
-          list={list}
+          list={dailyList}
           onRender={this.renderFunc}
           onBottom={this.handleBottom}
           onComplete={this.handleComplete}
@@ -132,4 +166,4 @@ class Data extends Component {
   }
 }
 
-export default Data
+export default Daily

@@ -24,8 +24,8 @@ const HTTP_STATUS = {
 
 const customInterceptor = chain => {
   const requestParams = chain.requestParams
+
   return chain.proceed(requestParams).then(res => {
-    console.log('res=>', res)
     if (res.statusCode === HTTP_STATUS.NOT_FOUND) {
       return Promise.reject('请求资源不存在')
     } else if (res.statusCode === HTTP_STATUS.BAD_GATEWAY) {
@@ -40,7 +40,16 @@ const customInterceptor = chain => {
       pageToLogin()
       return Promise.reject('需要鉴权')
     } else if (res.statusCode === HTTP_STATUS.SUCCESS) {
-      return res.data
+      if (res.data.data[requestParams.type] == null) {
+        Taro.showToast({
+          title:
+            (res.data.errors && res.data.errors[0].message) || '服务器异常',
+          icon: 'none',
+          mask: true,
+        })
+      } else {
+        return res.data.data[requestParams.type]
+      }
     }
   })
 }

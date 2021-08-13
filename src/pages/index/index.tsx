@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
+import Taro from '@tarojs/taro'
 import { View, Text, Image } from '@tarojs/components'
 import { AtButton, AtDivider } from 'taro-ui'
 import { TaroVirtualList } from 'taro-virtual-list'
@@ -21,10 +22,9 @@ import './style.styl'
 
 type PageStateProps = {
   dispatch: Function
+  index: any
 }
 
-type PageOwnProps = {}
-type PageState = {}
 type IProps = PageStateProps
 
 interface Index {
@@ -33,7 +33,7 @@ interface Index {
 
 @connect(
   state => ({
-    state,
+    index: state.index,
   }),
   dispatch => ({
     dispatch,
@@ -69,16 +69,40 @@ class Index extends Component {
     })
   }
 
+  goToDaily = params => {
+    const { dispatch } = this.props
+    dispatch({
+      type: 'daily/getDailyListPage',
+      payload: params,
+    })
+    // 查询数据
+    Taro.navigateTo({
+      url: '/pages/daily/index',
+    })
+  }
+
   renderFunc = (item, index, pageIndex) => {
     return (
-      <View key={index} className="home_list">
+      <View
+        key={index}
+        className="home_list"
+        onClick={() => {
+          this.goToDaily({
+            text: '',
+            projectId: item.id,
+            type: 0,
+            pageIndex: 1,
+            pageSize: 10,
+          })
+        }}
+      >
         <Image
           className="home_img"
           style="width: 100%;height: 140px; "
-          src={dxk}
+          src={item.mainPhoto !== null ? item.mainPhoto : dxk}
         />
         <View className="home_title">
-          <Text>中铁隧道局林芝川藏铁路2标展厅项目</Text>
+          <Text>{item.name}</Text>
         </View>
       </View>
     )
@@ -93,23 +117,12 @@ class Index extends Component {
   }
 
   render() {
-    const list = [
-      { name: 'tiger' },
-      { name: 'tiger' },
-      { name: 'tiger' },
-      { name: 'tiger' },
-      { name: 'tiger' },
-      { name: 'tiger' },
-      { name: 'tiger' },
-      { name: 'tiger' },
-      { name: 'tiger' },
-      { name: 'tiger' },
-      { name: 'tiger' },
-    ]
+    const { index } = this.props
+    const { asyncData } = index
     return (
       <View className="index">
         <TaroVirtualList
-          list={list}
+          list={asyncData}
           onRender={this.renderFunc}
           onBottom={this.handleBottom}
           onComplete={this.handleComplete}

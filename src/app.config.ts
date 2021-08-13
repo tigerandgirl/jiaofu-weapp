@@ -1,9 +1,9 @@
 export default {
   pages: [
     'pages/index/index',
+    'pages/daily/index',
     'pages/daily/dailyview',
     'pages/daily/dailyedit',
-    'pages/daily/index',
     'pages/counter/index',
     'pages/data/index',
     'pages/map/index',

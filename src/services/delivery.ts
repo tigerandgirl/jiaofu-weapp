@@ -6,19 +6,36 @@
  */
 import fetch from '../utils/request'
 import Config from '../config'
-import SchemaWc from '../utils/schema/wechat'
 import Schemas from '../utils/schema/delivery'
 
 export async function getProjectPageList(params: {}) {
-  console.log('serivcesparams', params)
   return fetch.post(
     Config.delivery.getProjectPageList,
-    Object.assign(
-      {},
-      {
-        query: Schemas.delivery.getProjectPageList,
-        variables: params,
-      }
-    )
+    { query: Schemas.delivery.getProjectPageList, variables: params },
+    'getProjectPageList'
+  )
+}
+
+export async function getProjectDetail(params: {}) {
+  return fetch.post(
+    Config.delivery.getProjectDetail,
+    { query: Schemas.delivery.getProjectDetail, variables: params },
+    'getProjectDetail'
+  )
+}
+
+export async function getDailyListPage(params: {}) {
+  return fetch.post(
+    Config.delivery.getDailyListPage,
+    { query: Schemas.delivery.getDailyListPage, variables: params },
+    'getDailyListPage'
+  )
+}
+
+export async function getDailyById(params: {}) {
+  return fetch.post(
+    Config.delivery.getDailyById,
+    { query: Schemas.delivery.getDailyById, variables: params },
+    'getDailyById'
   )
 }

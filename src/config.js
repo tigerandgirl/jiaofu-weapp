@@ -9,7 +9,7 @@ if (process.env.NODE_ENV == 'development') {
     serverUrl = 'https://test.bocspace.cn:8094';          // 小程序阿里云测试
     // serverUrl = 'https://www.bocspace.cn:8094';          // 小程序阿里云
 } else {
-    //serverUrl = 'https://www.bocspace.cn:8094';           // 小程序生产
+    serverUrl = 'https://test.bocspace.cn:8094';           // 小程序生产
 }
 let Config = {
     baseUrl: serverUrl,

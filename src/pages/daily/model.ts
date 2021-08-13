@@ -9,32 +9,68 @@ import cloneDeep from 'lodash/cloneDeep'
 import assign from 'lodash/assign'
 import isArray from 'lodash/isArray'
 
-import * as dataServices from '../../services/data'
+import * as dataServices from '../../services/delivery'
 
 interface SetAsyncData {
   payload: {
     asyncData: any
+    dailyList: any[]
+    dailyDetail: any
   }
 }
 type InitState = {
   asyncData: any[]
+  dailyList: any[]
+  dailyDetail: any
 }
 
 const SET_ASYNC_DATA = 'SET_ASYNC_DATA'
 
 const initState: InitState = {
   asyncData: [],
+  dailyList: [],
+  dailyDetail: {
+    id: null,
+    date: null,
+    title: null,
+    progressState: null,
+    weather: null,
+    windPower: null,
+    overallDescription: null,
+    contentRemarks: null,
+    workersCount: null,
+    material: null,
+    summary: null,
+    tomorrowPlanRemarks: null,
+    tomorrowWeather: null,
+    tomorrowWindPower: null,
+    tomorrowMaterial: null,
+    assistance: null,
+    saveType: null,
+    createTime: 0,
+    likeCount: 0,
+    commentCount: 0,
+    readCount: 0,
+    contents: [],
+    tomorrowContents: [],
+    projectId: null,
+    comments: [],
+    likeUsers: [],
+    dailyDocuments: [],
+    createUser: null,
+    createUserName: null,
+  },
 }
 
 export default {
-  namespace: 'data',
+  namespace: 'daily',
   state: initState,
   effects: {
-    *fetch(_: void, { call, put }: DvaApi) {
+    *getProjectDetail({ payload }, { call, put }: DvaApi) {
       showLoading({ title: 'loading...' })
       let data: any[] = []
       try {
-        const res = yield call(dataServices.getAsyncData)
+        const res = yield call(dataServices.getProjectDetail, payload)
         if (!!res && isArray(res)) {
           data = cloneDeep(res)
         }
@@ -59,18 +95,63 @@ export default {
       }
       hideLoading()
     },
-    *init(_: void, { put }: DvaApi) {
-      yield put({
-        type: SET_ASYNC_DATA,
-        payload: {
-          asyncData: [],
-        },
-      })
-      showToast({
-        title: '重制完成',
-        icon: 'success',
-        duration: 1500,
-      })
+    *getDailyListPage({ payload }, { call, put }: DvaApi) {
+      showLoading({ title: 'loading...' })
+      let data: any[] = []
+      try {
+        const res = yield call(dataServices.getDailyListPage, payload)
+        if (!!res && isArray(res.body)) {
+          data = cloneDeep(res.body)
+        }
+        showToast({
+          title: '请求成功',
+          icon: 'success',
+          duration: 1500,
+        })
+      } catch (e) {
+        showToast({
+          title: '请求失败',
+          icon: 'loading',
+          duration: 1500,
+        })
+      } finally {
+        yield put({
+          type: 'updateState',
+          payload: {
+            dailyList: data,
+          },
+        })
+      }
+      hideLoading()
+    },
+    *getDailyById({ payload }, { call, put }: DvaApi) {
+      showLoading({ title: 'loading...' })
+      let data: any = {}
+      try {
+        const res = yield call(dataServices.getDailyById, payload)
+        if (!!res) {
+          data = cloneDeep(res)
+        }
+        showToast({
+          title: '请求成功',
+          icon: 'success',
+          duration: 1500,
+        })
+      } catch (e) {
+        showToast({
+          title: '请求失败',
+          icon: 'loading',
+          duration: 1500,
+        })
+      } finally {
+        yield put({
+          type: 'updateState',
+          payload: {
+            dailyDetail: data,
+          },
+        })
+      }
+      hideLoading()
     },
   },
   reducers: {
@@ -78,6 +159,12 @@ export default {
       return assign({}, state, {
         asyncData: payload.asyncData,
       })
+    },
+    updateState(state: InitState, { payload }: SetAsyncData) {
+      return {
+        ...state,
+        ...payload,
+      }
     },
   },
 }

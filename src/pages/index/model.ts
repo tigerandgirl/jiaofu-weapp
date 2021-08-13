@@ -30,21 +30,13 @@ export default {
   namespace: 'index',
   state: initState,
   effects: {
-    *fetch(payload, { call, put }: DvaApi) {
-      console.log('sdkfsdkfjksdfjk', payload)
+    *fetch({ payload }, { call, put }: DvaApi) {
       showLoading({ title: 'loading...' })
       let data: any[] = []
       try {
-        const res = yield call(dataServices.getProjectPageList, {
-          text: '',
-          state: 0,
-          orderType: 0,
-          parentId: null,
-          pageIndex: 1,
-          pageSize: 10,
-        })
-        if (!!res && isArray(res)) {
-          data = cloneDeep(res)
+        const res = yield call(dataServices.getProjectPageList, payload)
+        if (!!res && isArray(res.body)) {
+          data = cloneDeep(res.body)
         }
         showToast({
           title: '请求成功',

@@ -25,7 +25,7 @@ type Params = {
 }
 
 class fetch {
-  baseOptions(params, method: Params['method'] = 'GET') {
+  baseOptions(params, method: Params['method'] = 'GET', type) {
     let { url, data } = params
     const BASE_URL = getBaseUrl(url)
     let contentType = 'application/json'
@@ -34,6 +34,7 @@ class fetch {
       url: `${BASE_URL}${url}`,
       data,
       method,
+      type: type,
       header: {
         'content-type': contentType,
         Authorization: getStorageSync('Authorization'),
@@ -42,9 +43,9 @@ class fetch {
     return request(option)
   }
 
-  post(url: string, data: any) {
+  post(url: string, data: any, type: string) {
     let params = { url, data }
-    return this.baseOptions(params, 'POST')
+    return this.baseOptions(params, 'POST', type)
   }
 }
 
