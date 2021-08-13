@@ -72,6 +72,10 @@ class Index extends Component {
   goToDaily = params => {
     const { dispatch } = this.props
     dispatch({
+      type: 'daily/getProjectDetail',
+      payload: { id: params.projectId },
+    })
+    dispatch({
       type: 'daily/getDailyListPage',
       payload: params,
     })

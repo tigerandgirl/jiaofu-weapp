@@ -142,6 +142,12 @@ class Daily extends Component {
     console.log('加载完成')
   }
 
+  goToEditDaily = () => {
+    Taro.navigateTo({
+      url: '/pages/daily/dailyedit',
+    })
+  }
+
   render() {
     const { daily } = this.props
     const { dailyList } = daily
@@ -159,7 +165,9 @@ class Daily extends Component {
           }}
         />
         <View>
-          <AtButton type="primary">日报填写</AtButton>
+          <AtButton type="primary" onClick={this.goToEditDaily}>
+            日报填写
+          </AtButton>
         </View>
       </View>
     )

@@ -16,12 +16,14 @@ interface SetAsyncData {
     asyncData: any
     dailyList: any[]
     dailyDetail: any
+    projectDetail: any
   }
 }
 type InitState = {
   asyncData: any[]
   dailyList: any[]
   dailyDetail: any
+  projectDetail: any
 }
 
 const SET_ASYNC_DATA = 'SET_ASYNC_DATA'
@@ -60,6 +62,7 @@ const initState: InitState = {
     createUser: null,
     createUserName: null,
   },
+  projectDetail: null,
 }
 
 export default {
@@ -68,10 +71,10 @@ export default {
   effects: {
     *getProjectDetail({ payload }, { call, put }: DvaApi) {
       showLoading({ title: 'loading...' })
-      let data: any[] = []
+      let data: any = {}
       try {
         const res = yield call(dataServices.getProjectDetail, payload)
-        if (!!res && isArray(res)) {
+        if (!!res) {
           data = cloneDeep(res)
         }
         showToast({
@@ -87,9 +90,9 @@ export default {
         })
       } finally {
         yield put({
-          type: SET_ASYNC_DATA,
+          type: 'updateState',
           payload: {
-            asyncData: data,
+            projectDetail: data,
           },
         })
       }

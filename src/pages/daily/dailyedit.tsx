@@ -24,13 +24,9 @@ import './style.styl'
 
 type PageStateProps = {
   dispatch: Function
-  asyncData: any
+  daily: any
 }
-type PageDispatchProps = {
-  getAsyncData: () => void
-  initAsyncData: () => void
-}
-type IProps = PageStateProps & PageDispatchProps
+type IProps = PageStateProps
 
 interface DailyEdit {
   props: IProps
@@ -38,19 +34,10 @@ interface DailyEdit {
 
 @connect(
   state => ({
-    asyncData: state.data.asyncData,
+    daily: state.daily,
   }),
   dispatch => ({
-    getAsyncData(): void {
-      dispatch({
-        type: 'data/fetch',
-      })
-    },
-    initAsyncData(): void {
-      dispatch({
-        type: 'data/init',
-      })
-    },
+    dispatch,
   })
 )
 class DailyEdit extends Component {
@@ -71,13 +58,33 @@ class DailyEdit extends Component {
           'https://xinlj.oss-cn-beijing.aliyuncs.com/20210811/rc-upload-1628689757650-7/刺客信条：奥德赛2020-5-5-0-6-39.jpg',
       },
     ],
+    projectName: '',
   }
 
-  handleChange(value) {
+  componentDidMount() {
+    const { daily } = this.props
+    const { projectDetail } = daily
     this.setState({
-      value,
+      projectName: projectDetail['name'],
     })
   }
+
+  handleChange = (type, value) => {
+    let obj
+    obj[type] = value
+    this.setState({
+      obj,
+    })
+  }
+
+  handleChangeInfo = (type, value) => {
+    let obj
+    obj[type] = value
+    this.setState({
+      obj,
+    })
+  }
+
   onChange = e => {
     this.setState({
       selectorChecked: this.state.selector[e.detail.value],
@@ -111,8 +118,11 @@ class DailyEdit extends Component {
     console.log()
   }
   onReset(event) {}
+
   render() {
-    const { asyncData } = this.props
+    const { projectName } = this.state
+    const { daily } = this.props
+    const { projectDetail } = daily
     const dataSource = [
       {
         house: '办公楼',
@@ -162,11 +172,13 @@ class DailyEdit extends Component {
               title="标题"
               type="text"
               placeholder="标题"
-              value={''}
-              onChange={this.handleChange.bind(this, 'value')}
+              value={projectName}
+              onChange={value => {
+                this.handleChangeInfo('projectName', value)
+              }}
             />
           </View>
-          <View className="two-col">
+          {/* <View className="two-col">
             <Picker mode="date" onChange={this.onDateChange}>
               <AtList>
                 <AtListItem title="日期" extraText={this.state.dateSel} />
@@ -247,9 +259,9 @@ class DailyEdit extends Component {
               value={''}
               onChange={this.handleChange.bind(this)}
             />
-          </View>
+          </View> */}
 
-          <View>
+          {/* <View>
             <Picker
               mode="selector"
               range={this.state.selectorWeather}
@@ -382,7 +394,7 @@ class DailyEdit extends Component {
               maxLength={200}
               placeholder="备注"
             />
-          </View>
+          </View> */}
 
           <AtButton formType="submit">提交</AtButton>
         </AtForm>
