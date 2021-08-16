@@ -440,6 +440,31 @@ class DailyEdit extends Component {
   }
   onReset(event) {}
 
+  handleAddItem = () => {
+    const { todayContents } = this.state
+    let testData = [
+      {
+        id: 'c0cc0c1650b2536f',
+        number: 1,
+        position: '楼栋',
+        productCategory: '',
+        productDetail: '门窗安装',
+        specifications: '',
+        unit: '',
+        palnProgress: 33,
+        actualProgress: 44,
+        type: 1,
+        positionId: 'a6007dfae22038ce',
+        productCategoryId: null,
+        productDetailId: 'ac3a40d1d405ea03',
+        actualBeginTime: 1629043200000,
+        planBeginTime: 1628352000000,
+        planEndTime: 1629043199000,
+      },
+    ]
+    this.setState({ todayContents: Object.assign(todayContents, testData) })
+  }
+
   addTodayContent = () => {
     const { todayContents } = this.state
     // let keyIndex = todayContents.length+1
@@ -455,7 +480,7 @@ class DailyEdit extends Component {
     }
 
     this.setState({
-      todayContents: Object.assign([], todayContents, [newData]),
+      todayContents: [...todayContents, [newData]],
     })
   }
 
@@ -654,14 +679,15 @@ class DailyEdit extends Component {
   }
 
   render() {
-    const { projectName, todayConents, tommrowContents } = this.state
+    const { projectName, todayContents, tommrowContents } = this.state
     const { daily } = this.props
     const { projectDetail } = daily
 
-    const columns = [
+    const columns: any = [
       {
         title: '楼栋',
         dataIndex: 'position',
+        fixed: 'left',
         render: t => {
           return (
             <AtInput name="house" placeholder="请输入" type="text" value={''} />
@@ -672,6 +698,7 @@ class DailyEdit extends Component {
       {
         title: '施工任务',
         dataIndex: 'productDetail',
+        fixed: 'left',
         render: t => {
           return (
             <AtInput name="house" placeholder="请输入" type="text" value={''} />
@@ -682,6 +709,7 @@ class DailyEdit extends Component {
       {
         title: '计划进度',
         dataIndex: 'palnProgress',
+        fixed: 'left',
         render: t => {
           return (
             <AtInput name="house" placeholder="请输入" type="text" value={''} />
@@ -692,6 +720,7 @@ class DailyEdit extends Component {
       {
         title: '实际进度',
         dataIndex: 'actualProgress',
+        fixed: 'left',
         render: t => {
           return (
             <AtInput name="house" placeholder="请输入" type="text" value={''} />
@@ -807,26 +836,35 @@ class DailyEdit extends Component {
             />
           </View>
 
-          {/* <View className="vc" style={{marginTop:'30rpx'}}>
+          <View className="vc" style={{ marginTop: '30rpx' }}>
             <Text>今日施工内容：</Text>
-            <View onClick={this.addTodayContent}>
-              <Text  className="title2">添加内容</Text>
-              <Text className="title2 ml">删除末行</Text>
+            <View className="vc">
+              <AtButton
+                onClick={this.addTodayContent}
+                type="secondary"
+                size="small"
+              >
+                添加内容
+              </AtButton>
+              {/* <AtButton type='secondary' size='small'>删除末行</AtButton> */}
             </View>
           </View>
           <View style={{ display: 'flex', justifyContent: 'center' }}>
             <Table
+              onChange={v => {
+                console.log('onChange -', v)
+              }}
               style={{
                 width: '100vw',
               }}
               colStyle={{ padding: '5px 5px' }}
+              rowKey="id"
               columns={columns}
-              dataSource={todayConents}
-              // ...你的配置
+              dataSource={todayContents}
             />
           </View>
 
-          <View className="vc">
+          {/* <View className="vc">
             <Text>明日施工计划：</Text>
             <View>
               <Text className="title2">更新</Text>
