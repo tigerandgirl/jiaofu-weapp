@@ -484,6 +484,28 @@ class DailyEdit extends Component {
     })
   }
 
+  removeEndTodayContent = () => {
+    const { todayContents } = this.state
+
+    this.setState({
+      todayContents: todayContents.slice(0, -1),
+    })
+  }
+
+  handleEditTodayContent = (type, value, index) => {
+    const { todayContents } = this.state
+    const newData = todayContents.map((item: any, tcIndex: number) => {
+      if (tcIndex === index) {
+        item[type] = value
+        item = Object.assign({}, item)
+      }
+      return item
+    })
+    this.setState({
+      todayContents: newData,
+    })
+  }
+
   removeTodayConent = () => {}
 
   addTommrowContent = () => {}
@@ -688,9 +710,16 @@ class DailyEdit extends Component {
         title: '楼栋',
         dataIndex: 'position',
         fixed: 'left',
-        render: t => {
+        render: (text, record, index) => {
           return (
-            <AtInput name="house" placeholder="请输入" type="text" value={''} />
+            <AtInput
+              onChange={value => {
+                this.handleEditTodayContent('position', value, index)
+              }}
+              placeholder="请输入"
+              type="text"
+              value={text}
+            />
           )
         },
       },
@@ -699,7 +728,7 @@ class DailyEdit extends Component {
         title: '施工任务',
         dataIndex: 'productDetail',
         fixed: 'left',
-        render: t => {
+        render: (_, record, index) => {
           return (
             <AtInput name="house" placeholder="请输入" type="text" value={''} />
           )
@@ -710,7 +739,7 @@ class DailyEdit extends Component {
         title: '计划进度',
         dataIndex: 'palnProgress',
         fixed: 'left',
-        render: t => {
+        render: (_, record, index) => {
           return (
             <AtInput name="house" placeholder="请输入" type="text" value={''} />
           )
@@ -721,7 +750,7 @@ class DailyEdit extends Component {
         title: '实际进度',
         dataIndex: 'actualProgress',
         fixed: 'left',
-        render: t => {
+        render: (_, record, index) => {
           return (
             <AtInput name="house" placeholder="请输入" type="text" value={''} />
           )
@@ -846,7 +875,13 @@ class DailyEdit extends Component {
               >
                 添加内容
               </AtButton>
-              {/* <AtButton type='secondary' size='small'>删除末行</AtButton> */}
+              <AtButton
+                onClick={this.removeEndTodayContent}
+                type="secondary"
+                size="small"
+              >
+                删除末行
+              </AtButton>
             </View>
           </View>
           <View style={{ display: 'flex', justifyContent: 'center' }}>
