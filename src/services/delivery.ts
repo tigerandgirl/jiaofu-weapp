@@ -39,3 +39,11 @@ export async function getDailyById(params: {}) {
     'getDailyById'
   )
 }
+
+export async function saveDaily(params: {}) {
+  return fetch.post(
+    Config.delivery.saveDaily,
+    { query: Schemas.delivery.saveDaily, variables: params },
+    'saveDaily'
+  )
+}

@@ -23,7 +23,7 @@ type PageStateProps = {
 
 type IProps = PageStateProps
 
-interface Daily {
+interface Index {
   props: IProps
 }
 
@@ -35,7 +35,7 @@ interface Daily {
     dispatch,
   })
 )
-class Daily extends Component {
+class Index extends Component {
   constructor(props) {
     super(props)
   }
@@ -75,6 +75,7 @@ class Daily extends Component {
   }
 
   renderFunc = (item, index, pageIndex) => {
+    console.log('item=>', item)
     return (
       <View key={index} className="daily-list">
         <View
@@ -174,4 +175,4 @@ class Daily extends Component {
   }
 }
 
-export default Daily
+export default Index

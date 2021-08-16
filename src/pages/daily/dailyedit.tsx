@@ -19,7 +19,8 @@ import {
   AtImagePicker,
 } from 'taro-ui'
 import Table from 'taro3-table'
-
+import { v4 as uuidv4 } from 'uuid'
+import moment from 'moment'
 import './style.styl'
 
 type PageStateProps = {
@@ -32,6 +33,8 @@ interface DailyEdit {
   props: IProps
 }
 
+const dateFormat = 'YYYY-MM-DD'
+
 @connect(
   state => ({
     daily: state.daily,
@@ -42,12 +45,23 @@ interface DailyEdit {
 )
 class DailyEdit extends Component {
   state = {
-    dateSel: '2018-04-22',
+    date: moment(new Date()).format(dateFormat),
+    planOverTime: moment(new Date()).format(dateFormat),
     selector: ['正常', '延期', '提前'],
-    selectorChecked: '正常',
+    progressState: '正常',
     selectorWeather: ['晴', '雨', '雪', '大风', '雾'],
-    selectorWeatherChecked: '晴',
-    workerNum: 0,
+    weather: '晴',
+    selectorTomorrowWeather: ['晴', '雨', '雪', '大风', '雾'],
+    tomorrowWeather: '晴',
+    workersCount: 0,
+    countdownDay: 0,
+    arrivalMaterialText: 0,
+    distributionJson: '',
+    material: '',
+    tomorrowMaterial: '',
+    assistance: '',
+    summary: '',
+    contentRemarks: '',
     files: [
       {
         url:
@@ -59,13 +73,15 @@ class DailyEdit extends Component {
       },
     ],
     projectName: '',
+    todayContents: [],
+    tommrowContents: [],
   }
 
-  componentDidMount() {
+  componentWillMount() {
     const { daily } = this.props
     const { projectDetail } = daily
     this.setState({
-      projectName: projectDetail['name'],
+      projectName: !!projectDetail['name'] ? projectDetail['name'] : '',
     })
   }
 
@@ -90,9 +106,90 @@ class DailyEdit extends Component {
       selectorChecked: this.state.selector[e.detail.value],
     })
   }
+
+  onChangeTodayWeather = e => {
+    this.setState({
+      weather: this.state.selectorWeather[e.detail.value],
+    })
+  }
+
+  onChangeTomorrow = e => {
+    this.setState({
+      tomorrowWeather: this.state.selectorTomorrowWeather[e.detail.value],
+    })
+  }
+
+  handleChangeWorkersCount = value => {
+    this.setState({
+      workersCount: value,
+    })
+  }
+
+  handleChangeCountDownDay = value => {
+    this.setState({
+      countdownDay: value,
+    })
+  }
+
+  handleChangeDCCL = value => {
+    this.setState({
+      arrivalMaterialText: value,
+    })
+  }
+
+  handleChangePSJZ = value => {
+    this.setState({
+      distributionJson: value,
+    })
+  }
+
+  handleChangeMaterial = value => {
+    this.setState({
+      material: value,
+    })
+  }
+
+  handleChangeTomorrowMaterial = value => {
+    this.setState({
+      tomorrowMaterial: value,
+    })
+  }
+
+  handleChangeAssistance = value => {
+    this.setState({
+      assistance: value,
+    })
+  }
+
+  handleChangeSummary = value => {
+    this.setState({
+      summary: value,
+    })
+  }
+
+  handleChangeContentRemarks = value => {
+    this.setState({
+      contentRemarks: value,
+    })
+  }
+
+  handleChangeByType = (value, type) => {
+    let obj = {}
+    obj[type] = value
+    this.setState({
+      obj,
+    })
+  }
+
   onDateChange = e => {
     this.setState({
-      dateSel: e.detail.value,
+      date: e.detail.value,
+    })
+  }
+
+  onPlanOverTimeChange = e => {
+    this.setState({
+      planOverTime: e.detail.value,
     })
   }
 
@@ -119,44 +216,140 @@ class DailyEdit extends Component {
   }
   onReset(event) {}
 
+  addTodayContent = () => {
+    const { todayContents } = this.state
+    // let keyIndex = todayContents.length+1
+    let newData = {
+      id: '',
+      position: '',
+      productCategory: '',
+      productDetail: '',
+      specifications: '',
+      unit: '',
+      palnProgress: 0,
+      actualProgress: 0,
+    }
+
+    this.setState({
+      todayContents: Object.assign([], todayContents, [newData]),
+    })
+  }
+
+  removeTodayConent = () => {}
+
+  addTommrowContent = () => {}
+
+  removeTommrowConent = () => {}
+
+  submitPublish = e => {
+    e.preventDefault()
+    const { daily, dispatch } = this.props
+    const { projectDetail } = daily
+    const {
+      date,
+      planOverTime,
+      progressState,
+      weather,
+      tomorrowWeather,
+      workersCount,
+      countdownDay,
+      arrivalMaterialText,
+      distributionJson,
+      material,
+      tomorrowMaterial,
+      assistance,
+      summary,
+      contentRemarks,
+    } = this.state
+
+    let newDaily = Object.assign(
+      {},
+      {
+        weather: weather,
+        tomorrowWeather: tomorrowWeather,
+        progressState: parseInt(progressState),
+        workersCount: workersCount,
+        countdownDay: countdownDay,
+        arrivalMaterialText: arrivalMaterialText,
+        material: material,
+        tomorrowMaterial: tomorrowMaterial,
+        distributionJson: distributionJson,
+        // "dailyDocuments":newDailyDocuments,
+        title: date + ' 日报',
+        date: moment(date).valueOf(),
+        planOverTime: moment(planOverTime).valueOf(),
+        projectId: projectDetail.id,
+        summary: summary,
+        assistance: assistance,
+        contentRemarks: contentRemarks,
+      }
+    )
+    console.log(newDaily)
+    dispatch({
+      type: 'daily/getDailyById',
+      payload: { d: newDaily },
+    }).then(res => {
+      dispatch({
+        type: 'daily/getDailyListPage',
+        payload: {
+          text: '',
+          projectId: projectDetail.id,
+          type: 0,
+          pageIndex: 1,
+          pageSize: 10,
+        },
+      })
+      // 查询数据
+      Taro.navigateTo({
+        url: '/pages/daily/index',
+      })
+    })
+  }
+
   render() {
-    const { projectName } = this.state
+    const { projectName, todayConents, tommrowContents } = this.state
     const { daily } = this.props
     const { projectDetail } = daily
-    const dataSource = [
-      {
-        house: '办公楼',
-        workTask: '框架安装',
-        planProgress: '100%',
-        actualProgress: '90%',
-      },
-      {
-        house: '办公楼',
-        workTask: '框架安装',
-        planProgress: '100%',
-        actualProgress: '90%',
-      },
-    ]
 
     const columns = [
       {
         title: '楼栋',
-        dataIndex: 'house',
+        dataIndex: 'position',
+        render: t => {
+          return (
+            <AtInput name="house" placeholder="请输入" type="text" value={''} />
+          )
+        },
       },
 
       {
         title: '施工任务',
-        dataIndex: 'workTask',
+        dataIndex: 'productDetail',
+        render: t => {
+          return (
+            <AtInput name="house" placeholder="请输入" type="text" value={''} />
+          )
+        },
       },
 
       {
         title: '计划进度',
-        dataIndex: 'planProgress',
+        dataIndex: 'palnProgress',
+        render: t => {
+          return (
+            <AtInput name="house" placeholder="请输入" type="text" value={''} />
+          )
+        },
       },
 
       {
         title: '实际进度',
         dataIndex: 'actualProgress',
+        render: t => {
+          return (
+            <AtInput name="house" placeholder="请输入" type="text" value={''} />
+          )
+        },
       },
     ]
 
@@ -178,10 +371,10 @@ class DailyEdit extends Component {
               }}
             />
           </View>
-          {/* <View className="two-col">
+          <View className="two-col">
             <Picker mode="date" onChange={this.onDateChange}>
               <AtList>
-                <AtListItem title="日期" extraText={this.state.dateSel} />
+                <AtListItem title="日期" extraText={this.state.date} />
               </AtList>
             </Picker>
             <Picker
@@ -190,10 +383,7 @@ class DailyEdit extends Component {
               onChange={this.onChange}
             >
               <AtList>
-                <AtListItem
-                  title="进度"
-                  extraText={this.state.selectorChecked}
-                />
+                <AtListItem title="进度" extraText={this.state.progressState} />
               </AtList>
             </Picker>
           </View>
@@ -202,84 +392,78 @@ class DailyEdit extends Component {
             <Picker
               mode="selector"
               range={this.state.selectorWeather}
-              onChange={this.onChange}
+              onChange={this.onChangeTodayWeather}
             >
               <AtList>
-                <AtListItem
-                  title="今日天气"
-                  extraText={this.state.selectorWeatherChecked}
-                />
+                <AtListItem title="今日天气" extraText={this.state.weather} />
               </AtList>
             </Picker>
             <View className="vc">
               <Text className="title">工人</Text>
               <AtInputNumber
                 min={0}
-                max={10}
                 step={1}
-                value={this.state.workerNum}
-                onChange={this.handleChange.bind(this)}
+                value={this.state.workersCount}
+                onChange={this.handleChangeWorkersCount}
               />
             </View>
           </View>
 
-          <View className="two-col">
-            <Picker mode="date" onChange={this.onDateChange}>
+          <View style={{ display: 'flex', alignItems: 'center' }}>
+            <Picker mode="date" onChange={this.onPlanOverTimeChange}>
               <AtList>
                 <AtListItem
                   title="计划完成时间"
-                  extraText={this.state.dateSel}
+                  extraText={this.state.planOverTime}
                 />
               </AtList>
             </Picker>
-            <AtInput
-              title="倒计时"
-              name="value"
-              type="text"
-              placeholder=""
-              value={''}
-              onChange={this.handleChange.bind(this)}
+            <Text>倒计时</Text>
+            <AtInputNumber
+              min={0}
+              step={1}
+              value={this.state.countdownDay}
+              onChange={this.handleChangeCountDownDay}
             />
           </View>
 
           <View className="two-col">
-            <AtInput
-              title="到场材料"
-              name="value"
-              type="number"
-              placeholder=""
-              value={''}
-              onChange={this.handleChange.bind(this)}
-            />
+            <View style={{ display: 'flex', alignItems: 'center' }}>
+              <AtInput
+                title="到场材料"
+                name="arrivalMaterialText"
+                type="number"
+                placeholder="请输入"
+                value={this.state.arrivalMaterialText}
+                onChange={this.handleChangeDCCL}
+              />
+              <Text>%</Text>
+            </View>
             <AtInput
               title="配送进展"
               name="value"
               type="text"
-              placeholder=""
-              value={''}
-              onChange={this.handleChange.bind(this)}
+              placeholder="请输入"
+              value={this.state.distributionJson}
+              onChange={this.handleChangePSJZ}
             />
-          </View> */}
-
-          {/* <View>
-            <Picker
-              mode="selector"
-              range={this.state.selectorWeather}
-              onChange={this.onChange}
-            >
-              <AtList>
-                <AtListItem
-                  title="进场材料"
-                  extraText={this.state.selectorWeatherChecked}
-                />
-              </AtList>
-            </Picker>
           </View>
 
-          <View className="vc">
+          <View>
+            <AtInput
+              title="进场材料"
+              name="material"
+              type="text"
+              placeholder="请输入"
+              value={this.state.material}
+              onChange={this.handleChangeMaterial}
+            />
+          </View>
+
+          {/* <View className="vc" style={{marginTop:'30rpx'}}>
             <Text>今日施工内容：</Text>
-            <View>
-              <Text className="title2">添加内容</Text>
+            <View onClick={this.addTodayContent}>
+              <Text  className="title2">添加内容</Text>
               <Text className="title2 ml">删除末行</Text>
             </View>
           </View>
@@ -290,7 +474,7 @@ class DailyEdit extends Component {
               }}
               colStyle={{ padding: '5px 5px' }}
               columns={columns}
-              dataSource={dataSource}
+              dataSource={todayConents}
               // ...你的配置
             />
           </View>
@@ -310,12 +494,12 @@ class DailyEdit extends Component {
               }}
               colStyle={{ padding: '5px 5px' }}
               columns={columns}
-              dataSource={dataSource}
+              dataSource={tommrowContents}
               // ...你的配置
             />
-          </View>
+          </View> */}
 
-          <View>
+          {/* <View>
             <Text>现场照片/视频</Text>
           </View>
           <View>
@@ -335,33 +519,18 @@ class DailyEdit extends Component {
               files={this.state.files}
               onChange={this.onImgChange.bind(this)}
             />
-          </View>
-
-          <View className="vc">
-            <Picker
-              mode="selector"
-              range={this.state.selectorWeather}
-              onChange={this.onChange}
-            >
-              <AtList>
-                <AtListItem
-                  title="明日天气"
-                  extraText={this.state.selectorWeatherChecked}
-                />
-              </AtList>
-            </Picker>
-          </View>
+          </View> */}
 
           <View>
             <Picker
               mode="selector"
-              range={this.state.selectorWeather}
-              onChange={this.onChange}
+              range={this.state.selectorTomorrowWeather}
+              onChange={this.onChangeTomorrow}
             >
               <AtList>
                 <AtListItem
-                  title="明日进场材料"
-                  extraText={this.state.selectorWeatherChecked}
+                  title="明日天气"
+                  extraText={this.state.tomorrowWeather}
                 />
               </AtList>
             </Picker>
@@ -369,34 +538,50 @@ class DailyEdit extends Component {
 
           <View>
             <AtInput
-              name="value"
+              title="明日进场材料"
+              name="tomorrowMaterial"
+              type="text"
+              placeholder="请输入"
+              value={this.state.tomorrowMaterial}
+              onChange={this.handleChangeTomorrowMaterial}
+            />
+          </View>
+
+          <View>
+            <AtInput
+              name="assistance"
               title="风险与协助"
               type="text"
-              placeholder="标题"
-              value={''}
-              onChange={this.handleChange.bind(this, 'value')}
+              placeholder="请输入"
+              value={this.state.assistance}
+              onChange={this.handleChangeAssistance}
             />
           </View>
           <View>
             <Text>施工总结</Text>
             <AtTextarea
-              value={''}
-              onChange={this.handleChange.bind(this)}
-              maxLength={200}
+              value={this.state.summary}
+              onChange={this.handleChangeSummary}
               placeholder="施工总结"
             />
           </View>
           <View>
             <Text>备注</Text>
             <AtTextarea
-              value={''}
-              onChange={this.handleChange.bind(this)}
-              maxLength={200}
+              value={this.state.contentRemarks}
+              onChange={this.handleChangeContentRemarks}
               placeholder="备注"
             />
-          </View> */}
+          </View>
 
-          <AtButton formType="submit">提交</AtButton>
+          <AtButton
+            onClick={e => {
+              this.submitPublish(e)
+            }}
+            formType="submit"
+          >
+            提交
+          </AtButton>
         </AtForm>
       </View>
     )

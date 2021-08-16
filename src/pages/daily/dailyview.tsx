@@ -243,20 +243,6 @@ class DailyView extends Component {
   render() {
     const { daily } = this.props
     const { dailyDetail } = daily
-    const dataSource = [
-      {
-        house: '办公楼',
-        workTask: '框架安装',
-        planProgress: '100%',
-        actualProgress: '90%',
-      },
-      {
-        house: '办公楼',
-        workTask: '框架安装',
-        planProgress: '100%',
-        actualProgress: '90%',
-      },
-    ]
 
     const columns = [
       {
