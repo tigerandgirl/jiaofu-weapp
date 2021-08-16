@@ -21,6 +21,8 @@ import {
 import Table from 'taro3-table'
 import { v4 as uuidv4 } from 'uuid'
 import moment from 'moment'
+import Config from '../../config'
+
 import './style.styl'
 
 type PageStateProps = {
@@ -62,19 +64,14 @@ class DailyEdit extends Component {
     assistance: '',
     summary: '',
     contentRemarks: '',
-    files: [
-      {
-        url:
-          'https://xinlj.oss-cn-beijing.aliyuncs.com/20210811/rc-upload-1628689757650-5/刺客信条：奥德赛2020-5-5-0-6-37.jpg',
-      },
-      {
-        url:
-          'https://xinlj.oss-cn-beijing.aliyuncs.com/20210811/rc-upload-1628689757650-7/刺客信条：奥德赛2020-5-5-0-6-39.jpg',
-      },
-    ],
+    files: [],
+    files2: [],
     projectName: '',
     todayContents: [],
     tommrowContents: [],
+    dailyDocuments: [],
+    buttonDisabled: false,
+    imgList: [],
   }
 
   componentWillMount() {
@@ -193,15 +190,132 @@ class DailyEdit extends Component {
     })
   }
 
-  onImgChange(files) {
+  // 上传
+  onFileChange = (v, doType, index) => {
+    // doType代表操作类型，移除图片和添加图片,index为移除图片时返回的图片下标
+    if (doType === 'remove') {
+      this.setState({ imgList: v })
+    } else {
+      this.setState({ imgList: v })
+    }
+  }
+
+  // 上传
+  onFileChange2(v, doType, index) {
+    // doType代表操作类型，移除图片和添加图片,index为移除图片时返回的图片下标
+    const { dailyDocuments } = this.state
+    if (doType === 'remove') {
+      this.setState(() => {
+        return {
+          files: v,
+        }
+      })
+      this.setState({
+        dailyDocuments: Object.assign([], v),
+      })
+    } else {
+      // 多张上传时，先去掉已经上传的图片，再上传新的图片
+
+      // 新增
+      this.setState(
+        () => {
+          return {
+            files: v,
+          }
+        },
+        () => {
+          let that = this
+          // 已经上传的
+          const oldArray = dailyDocuments.map(item => {
+            return item.fileId
+          })
+          // 未上传的
+          const newArray = v.filter(vitem => {
+            if (!oldArray.includes(vitem.fileId)) {
+              return vitem
+            }
+          })
+          //console.log(v, '上传图片数', oldArray, newArray)
+
+          // 循环上传
+          for (let i = 0; i < newArray.length; i++) {
+            Taro.showLoading({
+              title: '上传中...',
+            })
+            //上传图片
+            Taro.uploadFile({
+              url: Config.multiUpload,
+              filePath: newArray[i].url,
+              name: 'file',
+              header: {
+                'Content-Type': 'multipart/form-data',
+              },
+              formData: {
+                method: 'POST',
+                fileType: 1,
+              },
+              success: function (res) {
+                const data = JSON.parse(res.data).body
+                // 保存附件
+                const attachments =
+                  dailyDocuments == null
+                    ? []
+                    : JSON.parse(JSON.stringify(dailyDocuments))
+                // 过滤已经上传的
+                // if (!attachments.includes(data[0].fileId)) {
+                //
+                // }
+                attachments.push({
+                  fileId: data[0].fileId,
+                  fileName: data[0].fileName,
+                  filePath: data[0].fileURL,
+                  id: data[0].id,
+                  url: data[0].fileURL,
+                })
+                that.setState({
+                  dailyDocuments: Object.assign(attachments),
+                })
+              },
+              fail: function () {
+                Taro.hideLoading()
+                Taro.showToast({
+                  title: '上传失败',
+                  icon: 'none',
+                })
+              },
+              complete: () => {
+                Taro.hideLoading()
+              },
+            })
+          }
+        }
+      )
+    }
+  }
+
+  onImgChange1(dailyDocuments) {
+    this.setState({
+      dailyDocuments,
+    })
+  }
+
+  onImageClick1 = (index, file) => {
+    console.log(index, file)
+    Taro.previewImage({
+      current: file.url,
+      urls: this.state.dailyDocuments.map(item => {
+        return item.url
+      }),
+    })
+  }
+
+  onImgChange2(files) {
     this.setState({
       files,
     })
   }
-  onFail(mes) {
-    console.log(mes)
-  }
-  onImageClick = (index, file) => {
+
+  onImageClick2 = (index, file) => {
     console.log(index, file)
     Taro.previewImage({
       current: file.url,
@@ -209,6 +323,9 @@ class DailyEdit extends Component {
         return item.url
       }),
     })
+  }
+  onFail(mes) {
+    console.log(mes)
   }
 
   onSubmit(event) {
@@ -241,6 +358,24 @@ class DailyEdit extends Component {
 
   removeTommrowConent = () => {}
 
+  saveAndUpload = (files: any) => {
+    this.setState({ buttonDisabled: true }, () => {
+      Taro.showLoading({
+        title: '上传中...',
+      })
+      files.forEach((item, index) => {})
+    })
+  }
+
+  genDailyDocmentName = (item, index) => {
+    const { date } = this.state
+    const { daily } = this.props
+    const { projectDetail } = daily
+    const num = index + 1 < 10 ? '0' + (index + 1) : index + 1
+
+    return '日报_' + date + '_0' + num + '_' + projectDetail.name
+  }
+
   submitPublish = e => {
     e.preventDefault()
     const { daily, dispatch } = this.props
@@ -260,7 +395,48 @@ class DailyEdit extends Component {
       assistance,
       summary,
       contentRemarks,
+      dailyDocuments,
     } = this.state
+
+    let newDailyDocuments = dailyDocuments.map((item: any, index) => {
+      if (item) {
+        // 区分视频和图片
+        const isVideo = /\.(avi|dat|mpg|wmv|asf|rm|rmvb|mov|flv|mp4|3gp|dv|divx|qt|asx)$/.test(
+          item.name
+        ) // 视频
+        if (isVideo) {
+          return Object.assign(
+            {},
+            {
+              name: item.name,
+              fileUrl:
+                item.filePath !== undefined && item.filePath !== null
+                  ? item.filePath
+                  : item.fileUrl,
+              category: 3,
+              id: item.id,
+              isVisible: 1,
+            }
+          )
+        } else {
+          // 图片
+          return Object.assign(
+            {},
+            {
+              name: item.name,
+              fileUrl:
+                item.filePath !== undefined && item.filePath !== null
+                  ? item.filePath
+                  : item.fileUrl,
+              category: 2,
+              id: item.id,
+              isVisible: 1,
+            }
+          )
+        }
+      }
+    })
+    newDailyDocuments = [...new Set(newDailyDocuments)]
 
     let newDaily = Object.assign(
       {},
@@ -274,7 +450,12 @@ class DailyEdit extends Component {
         material: material,
         tomorrowMaterial: tomorrowMaterial,
         distributionJson: distributionJson,
-        // "dailyDocuments":newDailyDocuments,
+        dailyDocuments: newDailyDocuments.map((item, index) => {
+          return Object.assign(item, {
+            name: this.genDailyDocmentName(item, index),
+            orders: index + 1,
+          })
+        }),
         title: date + ' 日报',
         date: moment(date).valueOf(),
         planOverTime: moment(planOverTime).valueOf(),
@@ -284,9 +465,10 @@ class DailyEdit extends Component {
         contentRemarks: contentRemarks,
       }
     )
-    console.log(newDaily)
+    console.log('newDaily=>', newDaily)
+    return false
     dispatch({
-      type: 'daily/getDailyById',
+      type: 'daily/saveDaily',
       payload: { d: newDaily },
     }).then(res => {
       dispatch({
@@ -499,14 +681,15 @@ class DailyEdit extends Component {
             />
           </View> */}
 
-          {/* <View>
+          <View>
             <Text>现场照片/视频</Text>
           </View>
           <View>
             <AtImagePicker
-              onImageClick={this.onImageClick}
-              files={this.state.files}
-              onChange={this.onImgChange.bind(this)}
+              multiple={true}
+              onImageClick={this.onImageClick1}
+              files={this.state.dailyDocuments}
+              onChange={this.onFileChange2.bind(this)}
             />
           </View>
 
@@ -515,11 +698,11 @@ class DailyEdit extends Component {
           </View>
           <View>
             <AtImagePicker
-              onImageClick={this.onImageClick}
-              files={this.state.files}
-              onChange={this.onImgChange.bind(this)}
+              onImageClick={this.onImageClick2}
+              files={this.state.files2}
+              onChange={this.onImgChange2.bind(this)}
             />
-          </View> */}
+          </View>
 
           <View>
             <Picker
