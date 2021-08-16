@@ -70,8 +70,20 @@ class DailyEdit extends Component {
     todayContents: [],
     tommrowContents: [],
     dailyDocuments: [],
+    ddDocuments: [], // 定点照片临时存储
     buttonDisabled: false,
     imgList: [],
+    daily: {
+      boxCount: null,
+      purpose: '',
+      planOverTime: null,
+      countdownDay: null,
+      arrivalCount: null,
+      installCount: null,
+      onWayCount: null,
+    },
+    dataSource2: [{ first: '', last: '' }],
+    dailyDetail: null,
   }
 
   componentWillMount() {
@@ -80,6 +92,8 @@ class DailyEdit extends Component {
     this.setState({
       projectName: !!projectDetail['name'] ? projectDetail['name'] : '',
     })
+
+    this.getDailyInfo()
   }
 
   handleChange = (type, value) => {
@@ -293,6 +307,99 @@ class DailyEdit extends Component {
     }
   }
 
+  // 上传
+  onFileChangeDD(v, doType, index) {
+    // doType代表操作类型，移除图片和添加图片,index为移除图片时返回的图片下标
+    const { ddDocuments } = this.state
+    if (doType === 'remove') {
+      this.setState(() => {
+        return {
+          files2: v,
+        }
+      })
+      this.setState({
+        ddDocuments: Object.assign([], v),
+      })
+    } else {
+      // 多张上传时，先去掉已经上传的图片，再上传新的图片
+
+      // 新增
+      this.setState(
+        () => {
+          return {
+            files2: v,
+          }
+        },
+        () => {
+          let that = this
+          // 已经上传的
+          const oldArray = ddDocuments.map(item => {
+            return item.fileId
+          })
+          // 未上传的
+          const newArray = v.filter(vitem => {
+            if (!oldArray.includes(vitem.fileId)) {
+              return vitem
+            }
+          })
+          //console.log(v, '上传图片数', oldArray, newArray)
+
+          // 循环上传
+          for (let i = 0; i < newArray.length; i++) {
+            Taro.showLoading({
+              title: '上传中...',
+            })
+            //上传图片
+            Taro.uploadFile({
+              url: Config.multiUpload,
+              filePath: newArray[i].url,
+              name: 'file',
+              header: {
+                'Content-Type': 'multipart/form-data',
+              },
+              formData: {
+                method: 'POST',
+                fileType: 1,
+              },
+              success: function (res) {
+                const data = JSON.parse(res.data).body
+                // 保存附件
+                const attachments =
+                  ddDocuments == null
+                    ? []
+                    : JSON.parse(JSON.stringify(ddDocuments))
+                // 过滤已经上传的
+                // if (!attachments.includes(data[0].fileId)) {
+                //
+                // }
+                attachments.push({
+                  fileId: data[0].fileId,
+                  fileName: data[0].fileName,
+                  filePath: data[0].fileURL,
+                  id: data[0].id,
+                  url: data[0].fileURL,
+                })
+                that.setState({
+                  ddDocuments: Object.assign(attachments),
+                })
+              },
+              fail: function () {
+                Taro.hideLoading()
+                Taro.showToast({
+                  title: '上传失败',
+                  icon: 'none',
+                })
+              },
+              complete: () => {
+                Taro.hideLoading()
+              },
+            })
+          }
+        }
+      )
+    }
+  }
+
   onImgChange1(dailyDocuments) {
     this.setState({
       dailyDocuments,
@@ -374,6 +481,64 @@ class DailyEdit extends Component {
     const num = index + 1 < 10 ? '0' + (index + 1) : index + 1
 
     return '日报_' + date + '_0' + num + '_' + projectDetail.name
+  }
+
+  getDailyInfo = () => {
+    const { daily, dispatch } = this.props
+    const { projectDetail, dailyDetail } = daily
+    const projectId = projectDetail.id
+    const field = Object.assign(dailyDetail)
+    this.setState({
+      dataSource2:
+        field.distributionJson == null || field.distributionJson == ''
+          ? [{ first: '', last: '' }]
+          : JSON.parse(field.distributionJson),
+    })
+    const params = {
+      projectId: projectId,
+      dateTime: moment(this.state.date).valueOf(),
+    }
+    dispatch({
+      type: 'daily/getDailyInfo',
+      payload: params,
+    }).then(res => {
+      if (res === null) {
+        this.setState({
+          daily: Object.assign(
+            {},
+            {
+              boxCount: null,
+              purpose: '',
+              planOverTime: null,
+              countdownDay: null,
+              arrivalCount:
+                field.arrivalCount == -1 ? null : field.arrivalCount,
+              installCount:
+                field.installCount == -1 ? null : field.installCount,
+              onWayCount: field.onWayCount == -1 ? null : field.onWayCount,
+            }
+          ),
+        })
+      } else {
+        if (
+          res.dailyProjectPhotos != null &&
+          Array.isArray(res.dailyProjectPhotos)
+        ) {
+          this.setState({
+            dailyDetail: Object.assign(field, {
+              dailyProjectPhotos: res.dailyProjectPhotos,
+            }),
+          })
+        }
+        this.setState({
+          daily: Object.assign({}, res, {
+            arrivalCount: res.arrivalCount == -1 ? null : field.arrivalCount,
+            installCount: res.installCount == -1 ? null : field.installCount,
+            onWayCount: res.onWayCount == -1 ? null : field.onWayCount,
+          }),
+        })
+      }
+    })
   }
 
   submitPublish = e => {
@@ -698,9 +863,10 @@ class DailyEdit extends Component {
           </View>
           <View>
             <AtImagePicker
+              length={4}
               onImageClick={this.onImageClick2}
               files={this.state.files2}
-              onChange={this.onImgChange2.bind(this)}
+              onChange={this.onFileChangeDD.bind(this)}
             />
           </View>
 

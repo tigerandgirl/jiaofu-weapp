@@ -47,3 +47,11 @@ export async function saveDaily(params: {}) {
     'saveDaily'
   )
 }
+
+export async function getDailyInfo(params: {}) {
+  return fetch.post(
+    Config.delivery.getDailyInfo,
+    { query: Schemas.delivery.getDailyInfo, variables: params },
+    'getDailyInfo'
+  )
+}
