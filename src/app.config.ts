@@ -1,6 +1,7 @@
 export default {
   pages: [
     'pages/index/index',
+    'pages/project/index',
     'pages/daily/index',
     'pages/daily/dailyview',
     'pages/daily/dailyedit',

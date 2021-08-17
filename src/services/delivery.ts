@@ -55,3 +55,19 @@ export async function getDailyInfo(params: {}) {
     'getDailyInfo'
   )
 }
+
+export async function getDailyObjList(params: {}) {
+  return fetch.post(
+    Config.delivery.getDailyObjList,
+    { query: Schemas.delivery.getDailyObjList, variables: params },
+    'getDailyObjList'
+  )
+}
+
+export async function getDetailWorkByPostionId(params: {}) {
+  return fetch.post(
+    Config.delivery.getDetailWorkByPostionId,
+    { query: Schemas.delivery.getDetailWorkByPostionId, variables: params },
+    'getDetailWorkByPostionId'
+  )
+}

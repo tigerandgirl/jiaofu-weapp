@@ -69,19 +69,16 @@ class Index extends Component {
     })
   }
 
-  goToDaily = params => {
+  goToProject = params => {
     const { dispatch } = this.props
     dispatch({
-      type: 'daily/getProjectDetail',
-      payload: { id: params.projectId },
-    })
-    dispatch({
-      type: 'daily/getDailyListPage',
+      type: 'project/getProjectDetail',
       payload: params,
-    })
-    // 查询数据
-    Taro.navigateTo({
-      url: '/pages/daily/index',
+    }).then(res => {
+      // 查询数据
+      Taro.navigateTo({
+        url: '/pages/project/index',
+      })
     })
   }
 
@@ -91,13 +88,7 @@ class Index extends Component {
         key={index}
         className="home_list"
         onClick={() => {
-          this.goToDaily({
-            text: '',
-            projectId: item.id,
-            type: 0,
-            pageIndex: 1,
-            pageSize: 10,
-          })
+          this.goToProject({ id: item.id })
         }}
       >
         <Image

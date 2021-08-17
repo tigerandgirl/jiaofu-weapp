@@ -17,6 +17,9 @@ import {
   AtListItem,
   AtTextarea,
   AtImagePicker,
+  AtDrawer,
+  AtFloatLayout,
+  AtIcon,
 } from 'taro-ui'
 import Table from 'taro3-table'
 import { v4 as uuidv4 } from 'uuid'
@@ -28,6 +31,7 @@ import './style.styl'
 type PageStateProps = {
   dispatch: Function
   daily: any
+  project: any
 }
 type IProps = PageStateProps
 
@@ -40,6 +44,7 @@ const dateFormat = 'YYYY-MM-DD'
 @connect(
   state => ({
     daily: state.daily,
+    project: state.project,
   }),
   dispatch => ({
     dispatch,
@@ -84,16 +89,50 @@ class DailyEdit extends Component {
     },
     dataSource2: [{ first: '', last: '' }],
     dailyDetail: null,
+
+    selectedRecord: null,
+    selectedField: null,
+    drawerVisible: false,
+    drawerVisible2: false,
+    productCategoryList: [],
+    productCategoryList2: [],
+    productCategoryValue: '',
   }
 
   componentWillMount() {
-    const { daily } = this.props
-    const { projectDetail } = daily
+    const { project } = this.props
+    const { projectDetail } = project
     this.setState({
       projectName: !!projectDetail['name'] ? projectDetail['name'] : '',
     })
 
     this.getDailyInfo()
+    this.getProductCategoryList()
+  }
+
+  getProductCategoryList = () => {
+    const { dispatch, project } = this.props
+    const { projectDetail } = project
+    dispatch({
+      type: 'daily/getDailyObjList',
+      payload: { dailyId: projectDetail.id, type: 0 },
+    }).then(res => {
+      if (res) {
+        this.setState({ productCategoryList: res })
+      }
+    })
+  }
+
+  getProductCategoryList2 = params => {
+    const { dispatch } = this.props
+    dispatch({
+      type: 'daily/getDetailWorkByPostionId',
+      payload: params,
+    }).then(res => {
+      if (res) {
+        this.setState({ productCategoryList2: res })
+      }
+    })
   }
 
   handleChange = (type, value) => {
@@ -467,15 +506,16 @@ class DailyEdit extends Component {
 
   addTodayContent = () => {
     const { todayContents } = this.state
-    // let keyIndex = todayContents.length+1
+    let key = todayContents.length
     let newData: any = [
       {
+        key: key,
         id: '',
         position: '',
-        productCategory: '',
-        productDetail: '',
-        specifications: '',
-        unit: '',
+        // productCategory: '',
+        productDetail: 'dddd',
+        // specifications: '',
+        // unit: '',
         palnProgress: 0,
         actualProgress: 0,
       },
@@ -495,7 +535,96 @@ class DailyEdit extends Component {
     })
   }
 
-  handleEditTodayContent = (type, value, record) => {
+  openFloatLayout = (type, record) => {
+    this.setState({
+      selectedRecord: record,
+      selectedField: type,
+      drawerVisible: true,
+    })
+  }
+
+  openFloatLayout2 = (type, record) => {
+    this.setState({
+      selectedRecord: record,
+      selectedField: type,
+      drawerVisible2: true,
+    })
+  }
+
+  handleSetProdcut = () => {
+    const { selectedRecord, productCategoryValue } = this.state
+    this.handleEditTodayContent(
+      { position: productCategoryValue, positionId: '' },
+      selectedRecord
+    )
+    this.setState({
+      drawerVisible: false,
+    })
+  }
+
+  handleSetCategory = () => {
+    const { selectedRecord, productCategoryValue } = this.state
+    this.handleEditTodayContent(
+      { position: productCategoryValue, positionId: '' },
+      selectedRecord
+    )
+    this.setState({
+      drawerVisible: false,
+    })
+  }
+
+  handleSetCategory2 = value => {
+    const { selectedRecord } = this.state
+
+    this.handleEditTodayContent(
+      { position: value.name, positionId: value.id },
+      selectedRecord
+    )
+    this.setState({
+      drawerVisible: false,
+    })
+  }
+
+  handleSetCategory3 = value => {
+    const { selectedRecord } = this.state
+
+    this.handleEditTodayContent(
+      {
+        productDetail: value.productDetail,
+        productDetailId: value.productDetailId,
+      },
+      selectedRecord
+    )
+    this.setState({
+      drawerVisible2: false,
+    })
+  }
+
+  showCategoryFloat = (type, value, record) => {
+    this.setState({
+      selectedRecord: record,
+      drawerVisible: true,
+    })
+  }
+
+  handleEditTodayContent = (obj, record) => {
+    const { todayContents } = this.state
+    let newList = Object.assign(todayContents)
+    newList = newList.map((item: any, index: number) => {
+      if (record['key'] === index) {
+        item = Object.assign(item, obj)
+      }
+      return item
+    })
+
+    this.setState({
+      todayContents: newList,
+      selectedRecord: record,
+      drawerVisible: true,
+    })
+  }
+
+  handleEditTc = (type, value, record) => {
     const { todayContents } = this.state
     let newList = Object.assign(todayContents)
     newList = newList.map((item: any, index: number) => {
@@ -529,16 +658,17 @@ class DailyEdit extends Component {
 
   genDailyDocmentName = (item, index) => {
     const { date } = this.state
-    const { daily } = this.props
-    const { projectDetail } = daily
+    const { daily, project } = this.props
+    const { projectDetail } = project
     const num = index + 1 < 10 ? '0' + (index + 1) : index + 1
 
     return '日报_' + date + '_0' + num + '_' + projectDetail.name
   }
 
   getDailyInfo = () => {
-    const { daily, dispatch } = this.props
-    const { projectDetail, dailyDetail } = daily
+    const { project, daily, dispatch } = this.props
+    const { dailyDetail } = daily
+    const { projectDetail } = project
     const projectId = projectDetail.id
     const field = Object.assign(dailyDetail)
     this.setState({
@@ -594,10 +724,16 @@ class DailyEdit extends Component {
     })
   }
 
+  handleChangeProductCategory = value => {
+    this.setState({
+      productCategoryValue: value,
+    })
+  }
+
   submitPublish = e => {
     e.preventDefault()
-    const { daily, dispatch } = this.props
-    const { projectDetail } = daily
+    const { project, daily, dispatch } = this.props
+    const { projectDetail } = project
     const {
       date,
       planOverTime,
@@ -614,6 +750,7 @@ class DailyEdit extends Component {
       summary,
       contentRemarks,
       dailyDocuments,
+      todayContents,
     } = this.state
 
     let newDailyDocuments = dailyDocuments.map((item: any, index) => {
@@ -659,6 +796,10 @@ class DailyEdit extends Component {
     let newDaily = Object.assign(
       {},
       {
+        contents: todayContents.map((item: any) => {
+          const { key, ...obj } = item
+          return obj
+        }),
         weather: weather,
         tomorrowWeather: tomorrowWeather,
         progressState: parseInt(progressState),
@@ -684,10 +825,10 @@ class DailyEdit extends Component {
       }
     )
     console.log('newDaily=>', newDaily)
-    return false
+    // return false
     dispatch({
       type: 'daily/saveDaily',
-      payload: { d: newDaily },
+      payload: { d: newDaily, saveType: 2 },
     }).then(res => {
       dispatch({
         type: 'daily/getDailyListPage',
@@ -707,25 +848,33 @@ class DailyEdit extends Component {
   }
 
   render() {
-    const { projectName, todayContents, tommrowContents } = this.state
-    const { daily } = this.props
-    const { projectDetail } = daily
+    const {
+      projectName,
+      todayContents,
+      tommrowContents,
+      drawerVisible,
+      drawerVisible2,
+      productCategoryList,
+      productCategoryList2,
+      productCategoryValue,
+      selectedField,
+    } = this.state
+    const { project } = this.props
+    const { projectDetail } = project
 
     const columns: any = [
       {
         title: '楼栋',
         dataIndex: 'position',
-        fixed: 'left',
         render: (text, record) => {
           return (
-            <AtInput
-              onBlur={value => {
-                this.handleEditTodayContent('position', value, record)
+            <View
+              onClick={() => {
+                this.openFloatLayout('position', record)
               }}
-              placeholder="请输入"
-              type="text"
-              value={record['position']}
-            />
+            >
+              {text === '' ? '添加内容' : text}
+            </View>
           )
         },
       },
@@ -733,17 +882,21 @@ class DailyEdit extends Component {
       {
         title: '施工任务',
         dataIndex: 'productDetail',
-        fixed: 'left',
         render: (text, record) => {
           return (
-            <AtInput
-              onBlur={value => {
-                this.handleEditTodayContent('productDetail', value, record)
+            <View
+              onClick={() => {
+                if (!!record['positionId'] && record['positionId'] !== '') {
+                  this.getProductCategoryList2({
+                    positionId: record['positionId'],
+                    datetime: 0,
+                  })
+                }
+                this.openFloatLayout2('productDetail', record)
               }}
-              placeholder="请输入"
-              type="text"
-              value={record['productDetail']}
-            />
+            >
+              {text === '' ? '添加内容' : text}
+            </View>
           )
         },
       },
@@ -751,23 +904,21 @@ class DailyEdit extends Component {
       {
         title: '计划进度',
         dataIndex: 'palnProgress',
-        fixed: 'left',
-        render: (_, record, index) => {
-          return (
-            <AtInput name="house" placeholder="请输入" type="text" value={''} />
-          )
-        },
+        // render: (_, record, index) => {
+        //   return (
+        //     <AtInput name="house" placeholder="请输入" type="text" value={''} />
+        //   )
+        // },
       },
 
       {
         title: '实际进度',
         dataIndex: 'actualProgress',
-        fixed: 'left',
-        render: (_, record, index) => {
-          return (
-            <AtInput name="house" placeholder="请输入" type="text" value={''} />
-          )
-        },
+        // render: (_, record, index) => {
+        //   return (
+        //     <AtInput name="house" placeholder="请输入" type="text" value={''} />
+        //   )
+        // },
       },
     ]
 
@@ -899,18 +1050,16 @@ class DailyEdit extends Component {
           </View>
           <View style={{ display: 'flex', justifyContent: 'center' }}>
             <Table
-              // onChange={v => {
-              //   console.log('onChange -', v)
-              // }}
+              onChange={v => {
+                console.log('onChange -', v)
+              }}
               style={{
                 width: '100vw',
               }}
               colStyle={{ padding: '5px 5px' }}
-              rowKey="id"
+              rowKey="key"
               columns={columns}
-              dataSource={todayContents.map((item, index) => {
-                return Object.assign(item, { key: index })
-              })}
+              dataSource={todayContents}
             />
           </View>
 
@@ -1020,6 +1169,68 @@ class DailyEdit extends Component {
             提交
           </AtButton>
         </AtForm>
+        <AtFloatLayout isOpened={drawerVisible}>
+          <View style={{ display: 'flex', alignItems: 'center' }}>
+            <View style={{ width: '90%' }}>
+              <AtInput
+                name="value"
+                type="text"
+                placeholder="手动输入内容"
+                value={productCategoryValue}
+                onChange={this.handleChangeProductCategory}
+              />
+            </View>
+            <View onClick={this.handleSetCategory}>
+              <AtIcon value="check" size="20" color="#70bb48"></AtIcon>
+            </View>
+          </View>
+          <View>
+            <AtList>
+              {productCategoryList.map((item: any, index: number) => {
+                return (
+                  <AtListItem
+                    onClick={() => {
+                      this.handleSetCategory2(item)
+                    }}
+                    key={index}
+                    title={item.name}
+                  />
+                )
+              })}
+            </AtList>
+          </View>
+        </AtFloatLayout>
+        <AtFloatLayout isOpened={drawerVisible2}>
+          <View style={{ display: 'flex', alignItems: 'center' }}>
+            <View style={{ width: '90%' }}>
+              <AtInput
+                name="value"
+                type="text"
+                placeholder="手动输入内容"
+                value={productCategoryValue}
+                onChange={this.handleChangeProductCategory}
+              />
+            </View>
+            <View onClick={this.handleSetCategory}>
+              <AtIcon value="check" size="20" color="#70bb48"></AtIcon>
+            </View>
+          </View>
+          <View>
+            <AtList>
+              {productCategoryList2.map((item: any, index: number) => {
+                return (
+                  <AtListItem
+                    onClick={() => {
+                      this.handleSetCategory3(item)
+                    }}
+                    key={index}
+                    title={item.productDetail}
+                  />
+                )
+              })}
+            </AtList>
+          </View>
+        </AtFloatLayout>
       </View>
     )
   }

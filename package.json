@@ -1,7 +1,7 @@
 {
-  "name": "elf-taro-cli",
+  "name": "bocspace_jiaofu",
   "version": "2.0.0",
-  "description": "Taro 小程序 模版项目",
+  "description": "Taro 小程序 智建交付",
   "repository": "git@github.com:didilinkin/elf-taro-cli.git",
   "author": "yanxiaodi <929213769@qq.com>",
   "license": "MIT",
