@@ -73,7 +73,7 @@ class DailyEdit extends Component {
     files2: [],
     projectName: '',
     todayContents: [],
-    tommrowContents: [],
+    tomorrowContents: [],
     dailyDocuments: [],
     ddDocuments: [], // 定点照片临时存储
     buttonDisabled: false,
@@ -97,6 +97,7 @@ class DailyEdit extends Component {
     productCategoryList: [],
     productCategoryList2: [],
     productCategoryValue: '',
+    todayOrTomorrow: 1, //1:today,2:tomorrow
   }
 
   componentWillMount() {
@@ -446,7 +447,6 @@ class DailyEdit extends Component {
   }
 
   onImageClick1 = (index, file) => {
-    console.log(index, file)
     Taro.previewImage({
       current: file.url,
       urls: this.state.dailyDocuments.map(item => {
@@ -462,7 +462,6 @@ class DailyEdit extends Component {
   }
 
   onImageClick2 = (index, file) => {
-    console.log(index, file)
     Taro.previewImage({
       current: file.url,
       urls: this.state.files.map(item => {
@@ -471,38 +470,13 @@ class DailyEdit extends Component {
     })
   }
   onFail(mes) {
-    console.log(mes)
+    // console.log(mes)
   }
 
   onSubmit(event) {
-    console.log()
+    // console.log()
   }
   onReset(event) {}
-
-  handleAddItem = () => {
-    const { todayContents } = this.state
-    let testData = [
-      {
-        id: 'c0cc0c1650b2536f',
-        number: 1,
-        position: '楼栋',
-        productCategory: '',
-        productDetail: '门窗安装',
-        specifications: '',
-        unit: '',
-        palnProgress: 33,
-        actualProgress: 44,
-        type: 1,
-        positionId: 'a6007dfae22038ce',
-        productCategoryId: null,
-        productDetailId: 'ac3a40d1d405ea03',
-        actualBeginTime: 1629043200000,
-        planBeginTime: 1628352000000,
-        planEndTime: 1629043199000,
-      },
-    ]
-    this.setState({ todayContents: Object.assign(todayContents, testData) })
-  }
 
   addTodayContent = () => {
     const { todayContents } = this.state
@@ -512,16 +486,12 @@ class DailyEdit extends Component {
         key: key,
         id: '',
         position: '',
-        // productCategory: '',
-        productDetail: 'dddd',
-        // specifications: '',
-        // unit: '',
+        productDetail: '',
         palnProgress: 0,
         actualProgress: 0,
       },
     ]
     const newList = todayContents.concat(newData)
-    console.log('newlist', newList)
     this.setState({
       todayContents: newList,
     })
@@ -529,9 +499,34 @@ class DailyEdit extends Component {
 
   removeEndTodayContent = () => {
     const { todayContents } = this.state
-
     this.setState({
       todayContents: todayContents.slice(0, -1),
+    })
+  }
+
+  addTomorrowContent = () => {
+    const { tomorrowContents } = this.state
+    let key = tomorrowContents.length
+    let newData: any = [
+      {
+        key: key,
+        id: '',
+        position: '',
+        productDetail: '',
+        palnProgress: 0,
+        actualProgress: 0,
+      },
+    ]
+    const newList = tomorrowContents.concat(newData)
+    this.setState({
+      tomorrowContents: newList,
+    })
+  }
+
+  removeEndTomorrowContent = () => {
+    const { tomorrowContents } = this.state
+    this.setState({
+      tomorrowContents: tomorrowContents.slice(0, -1),
     })
   }
 
@@ -563,38 +558,64 @@ class DailyEdit extends Component {
   }
 
   handleSetCategory = () => {
-    const { selectedRecord, productCategoryValue } = this.state
-    this.handleEditTodayContent(
-      { position: productCategoryValue, positionId: '' },
-      selectedRecord
-    )
+    const { selectedRecord, productCategoryValue, todayOrTomorrow } = this.state
+    if (todayOrTomorrow === 1) {
+      this.handleEditTodayContent(
+        { position: productCategoryValue, positionId: '' },
+        selectedRecord
+      )
+    } else {
+      this.handleEditTomorrowContent(
+        { position: productCategoryValue, positionId: '' },
+        selectedRecord
+      )
+    }
+
     this.setState({
       drawerVisible: false,
     })
   }
 
   handleSetCategory2 = value => {
-    const { selectedRecord } = this.state
+    const { selectedRecord, todayOrTomorrow } = this.state
+    if (todayOrTomorrow === 1) {
+      this.handleEditTodayContent(
+        { position: value.name, positionId: value.id },
+        selectedRecord
+      )
+    } else {
+      this.handleEditTomorrowContent(
+        { position: value.name, positionId: value.id },
+        selectedRecord
+      )
+    }
 
-    this.handleEditTodayContent(
-      { position: value.name, positionId: value.id },
-      selectedRecord
-    )
     this.setState({
       drawerVisible: false,
     })
   }
 
   handleSetCategory3 = value => {
-    const { selectedRecord } = this.state
+    const { selectedRecord, todayOrTomorrow } = this.state
 
-    this.handleEditTodayContent(
-      {
-        productDetail: value.productDetail,
-        productDetailId: value.productDetailId,
-      },
-      selectedRecord
-    )
+    if (todayOrTomorrow === 1) {
+      this.handleEditTodayContent(
+        {
+          productDetail: value.productDetail,
+          productDetailId: value.productDetailId,
+        },
+        selectedRecord
+      )
+    } else {
+      this.handleEditTomorrowContent(
+        {
+          productDetail: value.productDetail,
+          productDetailId: value.productDetailId,
+        },
+        selectedRecord
+      )
+    }
+
     this.setState({
       drawerVisible2: false,
     })
@@ -620,7 +641,22 @@ class DailyEdit extends Component {
     this.setState({
       todayContents: newList,
       selectedRecord: record,
-      drawerVisible: true,
+    })
+  }
+
+  handleEditTomorrowContent = (obj, record) => {
+    const { tomorrowContents } = this.state
+    let newList = Object.assign(tomorrowContents)
+    newList = newList.map((item: any, index: number) => {
+      if (record['key'] === index) {
+        item = Object.assign(item, obj)
+      }
+      return item
+    })
+
+    this.setState({
+      tomorrowContents: newList,
+      selectedRecord: record,
     })
   }
 
@@ -751,6 +787,7 @@ class DailyEdit extends Component {
       contentRemarks,
       dailyDocuments,
       todayContents,
+      tomorrowContents,
     } = this.state
 
     let newDailyDocuments = dailyDocuments.map((item: any, index) => {
@@ -824,8 +861,6 @@ class DailyEdit extends Component {
         contentRemarks: contentRemarks,
       }
     )
-    console.log('newDaily=>', newDaily)
-    // return false
     dispatch({
       type: 'daily/saveDaily',
       payload: { d: newDaily, saveType: 2 },
@@ -851,13 +886,14 @@ class DailyEdit extends Component {
     const {
       projectName,
       todayContents,
-      tommrowContents,
+      tomorrowContents,
       drawerVisible,
       drawerVisible2,
       productCategoryList,
       productCategoryList2,
       productCategoryValue,
-      selectedField,
+      distributionJson,
+      arrivalMaterialText,
     } = this.state
     const { project } = this.props
     const { projectDetail } = project
@@ -870,6 +906,7 @@ class DailyEdit extends Component {
           return (
             <View
               onClick={() => {
+                this.setState({ todayOrTomorrow: 1 })
                 this.openFloatLayout('position', record)
               }}
             >
@@ -878,7 +915,6 @@ class DailyEdit extends Component {
           )
         },
       },
-
       {
         title: '施工任务',
         dataIndex: 'productDetail',
@@ -892,6 +928,7 @@ class DailyEdit extends Component {
                     datetime: 0,
                   })
                 }
+                this.setState({ todayOrTomorrow: 1 })
                 this.openFloatLayout2('productDetail', record)
               }}
             >
@@ -904,21 +941,117 @@ class DailyEdit extends Component {
       {
         title: '计划进度',
         dataIndex: 'palnProgress',
-        // render: (_, record, index) => {
-        //   return (
-        //     <AtInput name="house" placeholder="请输入" type="text" value={''} />
-        //   )
-        // },
+        render: (text, record) => {
+          return (
+            <AtInput
+              onBlur={value => {
+                this.handleEditTodayContent({ palnProgress: value }, record)
+              }}
+              name="palnProgress"
+              placeholder="请输入"
+              type="text"
+              value={text}
+            />
+          )
+        },
       },
 
       {
         title: '实际进度',
         dataIndex: 'actualProgress',
-        // render: (_, record, index) => {
-        //   return (
-        //     <AtInput name="house" placeholder="请输入" type="text" value={''} />
-        //   )
-        // },
+        render: (text, record) => {
+          return (
+            <AtInput
+              onBlur={value => {
+                this.handleEditTodayContent({ actualProgress: value }, record)
+              }}
+              name="palnProgress"
+              placeholder="请输入"
+              type="text"
+              value={text}
+            />
+          )
+        },
+      },
+    ]
+
+    const columns2: any = [
+      {
+        title: '楼栋',
+        dataIndex: 'position',
+        render: (text, record) => {
+          return (
+            <View
+              onClick={() => {
+                this.setState({ todayOrTomorrow: 2 })
+                this.openFloatLayout('position', record)
+              }}
+            >
+              {text === '' ? '添加内容' : text}
+            </View>
+          )
+        },
+      },
+      {
+        title: '施工任务',
+        dataIndex: 'productDetail',
+        render: (text, record) => {
+          return (
+            <View
+              onClick={() => {
+                if (!!record['positionId'] && record['positionId'] !== '') {
+                  this.getProductCategoryList2({
+                    positionId: record['positionId'],
+                    datetime: 0,
+                  })
+                }
+                this.setState({ todayOrTomorrow: 2 })
+                this.openFloatLayout2('productDetail', record)
+              }}
+            >
+              {text === '' ? '添加内容' : text}
+            </View>
+          )
+        },
+      },
+
+      {
+        title: '计划进度',
+        dataIndex: 'palnProgress',
+        render: (text, record) => {
+          return (
+            <AtInput
+              onBlur={value => {
+                this.handleEditTomorrowContent({ palnProgress: value }, record)
+              }}
+              name="palnProgress"
+              placeholder="请输入"
+              type="text"
+              value={text}
+            />
+          )
+        },
+      },
+
+      {
+        title: '实际进度',
+        dataIndex: 'actualProgress',
+        render: (text, record) => {
+          return (
+            <AtInput
+              onBlur={value => {
+                this.handleEditTomorrowContent(
+                  { actualProgress: value },
+                  record
+                )
+              }}
+              name="palnProgress"
+              placeholder="请输入"
+              type="text"
+              value={text}
+            />
+          )
+        },
       },
     ]
 
@@ -1003,17 +1136,17 @@ class DailyEdit extends Component {
                 name="arrivalMaterialText"
                 type="number"
                 placeholder="请输入"
-                value={this.state.arrivalMaterialText}
+                value={arrivalMaterialText}
                 onChange={this.handleChangeDCCL}
               />
               <Text>%</Text>
             </View>
             <AtInput
               title="配送进展"
-              name="value"
+              name="distributionJson"
               type="text"
               placeholder="请输入"
-              value={this.state.distributionJson}
+              value={distributionJson}
               onChange={this.handleChangePSJZ}
             />
           </View>
@@ -1051,7 +1184,7 @@ class DailyEdit extends Component {
           <View style={{ display: 'flex', justifyContent: 'center' }}>
             <Table
               onChange={v => {
-                console.log('onChange -', v)
+                // console.log('onChange -', v)
               }}
               style={{
                 width: '100vw',
@@ -1063,25 +1196,39 @@ class DailyEdit extends Component {
             />
           </View>
 
-          {/* <View className="vc">
+          <View className="vc">
             <Text>明日施工计划：</Text>
-            <View>
-              <Text className="title2">更新</Text>
-              <Text className="title2  ml">添加内容</Text>
-              <Text className="title2 ml">删除末行</Text>
+            <View className="vc">
+              <AtButton
+                onClick={this.addTomorrowContent}
+                type="secondary"
+                size="small"
+              >
+                添加内容
+              </AtButton>
+              <AtButton
+                onClick={this.removeEndTomorrowContent}
+                type="secondary"
+                size="small"
+              >
+                删除末行
+              </AtButton>
             </View>
           </View>
           <View style={{ display: 'flex', justifyContent: 'center' }}>
             <Table
+              onChange={v => {
+                // console.log('onChange -', v)
+              }}
               style={{
                 width: '100vw',
               }}
               colStyle={{ padding: '5px 5px' }}
-              columns={columns}
-              dataSource={tommrowContents}
-              // ...你的配置
+              rowKey="key"
+              columns={columns2}
+              dataSource={tomorrowContents}
             />
-          </View> */}
+          </View>
 
           <View>
             <Text>现场照片/视频</Text>
