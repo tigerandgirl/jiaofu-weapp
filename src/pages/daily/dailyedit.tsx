@@ -468,19 +468,22 @@ class DailyEdit extends Component {
   addTodayContent = () => {
     const { todayContents } = this.state
     // let keyIndex = todayContents.length+1
-    let newData = {
-      id: '',
-      position: '',
-      productCategory: '',
-      productDetail: '',
-      specifications: '',
-      unit: '',
-      palnProgress: 0,
-      actualProgress: 0,
-    }
-
+    let newData: any = [
+      {
+        id: '',
+        position: '',
+        productCategory: '',
+        productDetail: '',
+        specifications: '',
+        unit: '',
+        palnProgress: 0,
+        actualProgress: 0,
+      },
+    ]
+    const newList = todayContents.concat(newData)
+    console.log('newlist', newList)
     this.setState({
-      todayContents: [...todayContents, [newData]],
+      todayContents: newList,
     })
   }
 
@@ -492,17 +495,20 @@ class DailyEdit extends Component {
     })
   }
 
-  handleEditTodayContent = (type, value, index) => {
+  handleEditTodayContent = (type, value, record) => {
     const { todayContents } = this.state
-    const newData = todayContents.map((item: any, tcIndex: number) => {
-      if (tcIndex === index) {
-        item[type] = value
-        item = Object.assign({}, item)
+    let newList = Object.assign(todayContents)
+    newList = newList.map((item: any, index: number) => {
+      if (record['key'] === index) {
+        let obj = {}
+        obj[type] = value
+        item = Object.assign(item, obj)
       }
       return item
     })
+
     this.setState({
-      todayContents: newData,
+      todayContents: newList,
     })
   }
 
@@ -710,15 +716,15 @@ class DailyEdit extends Component {
         title: '楼栋',
         dataIndex: 'position',
         fixed: 'left',
-        render: (text, record, index) => {
+        render: (text, record) => {
           return (
             <AtInput
-              onChange={value => {
-                this.handleEditTodayContent('position', value, index)
+              onBlur={value => {
+                this.handleEditTodayContent('position', value, record)
               }}
               placeholder="请输入"
               type="text"
-              value={text}
+              value={record['position']}
             />
           )
         },
@@ -728,9 +734,16 @@ class DailyEdit extends Component {
         title: '施工任务',
         dataIndex: 'productDetail',
         fixed: 'left',
-        render: (_, record, index) => {
+        render: (text, record) => {
           return (
-            <AtInput name="house" placeholder="请输入" type="text" value={''} />
+            <AtInput
+              onBlur={value => {
+                this.handleEditTodayContent('productDetail', value, record)
+              }}
+              placeholder="请输入"
+              type="text"
+              value={record['productDetail']}
+            />
           )
         },
       },
@@ -886,16 +899,18 @@ class DailyEdit extends Component {
           </View>
           <View style={{ display: 'flex', justifyContent: 'center' }}>
             <Table
-              onChange={v => {
-                console.log('onChange -', v)
-              }}
+              // onChange={v => {
+              //   console.log('onChange -', v)
+              // }}
               style={{
                 width: '100vw',
               }}
               colStyle={{ padding: '5px 5px' }}
               rowKey="id"
               columns={columns}
-              dataSource={todayContents}
+              dataSource={todayContents.map((item, index) => {
+                return Object.assign(item, { key: index })
+              })}
             />
           </View>
 
