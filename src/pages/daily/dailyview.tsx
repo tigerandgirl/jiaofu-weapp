@@ -240,6 +240,12 @@ class DailyView extends Component {
     return dds
   }
 
+  getDailyDetail = () => {
+    Taro.navigateTo({
+      url: '/pages/daily/dailyedit',
+    })
+  }
+
   render() {
     const { daily } = this.props
     const { dailyDetail } = daily
@@ -267,260 +273,269 @@ class DailyView extends Component {
     ]
 
     return (
-      <View className="daily-edit">
-        <AtForm
-          onSubmit={this.onSubmit.bind(this)}
-          onReset={this.onReset.bind(this)}
-        >
-          <View>
-            <AtInput
-              name="value"
-              title="标题"
-              type="text"
-              placeholder="标题"
-              value={dailyDetail.title}
-              onChange={this.handleChange.bind(this, 'value')}
-            />
-          </View>
-          <View className="two-col">
-            <Picker disabled={true} mode="date" onChange={this.onDateChange}>
-              <AtList>
-                <AtListItem
-                  title="日期"
-                  extraText={moment(dailyDetail.date).format(dateFormat)}
-                />
-              </AtList>
-            </Picker>
-            <Picker
-              mode="selector"
-              range={this.state.selector}
-              onChange={this.onChange}
-              disabled={true}
-            >
-              <AtList>
-                <AtListItem
-                  title="进度"
-                  extraText={this.getProgressStateInfo(
-                    dailyDetail.progressState
-                  )}
-                />
-              </AtList>
-            </Picker>
-          </View>
-
-          <View className="two-col">
-            <Picker
-              mode="selector"
-              range={this.state.selectorWeather}
-              onChange={this.onChange}
-              disabled={true}
-            >
-              <AtList>
-                <AtListItem
-                  title="今日天气"
-                  extraText={
-                    dailyDetail.weather == null ? '' : dailyDetail.weather
-                  }
-                />
-              </AtList>
-            </Picker>
-            <View className="vc">
-              <Text className="title">工人</Text>
-              <Text className="title">{dailyDetail.workersCount} 人</Text>
+      <View>
+        <View className="daily-edit">
+          <AtForm
+            onSubmit={this.onSubmit.bind(this)}
+            onReset={this.onReset.bind(this)}
+          >
+            <View>
+              <AtInput
+                name="value"
+                title="标题"
+                type="text"
+                placeholder="标题"
+                value={dailyDetail.title}
+                onChange={this.handleChange.bind(this, 'value')}
+              />
             </View>
-          </View>
+            <View className="two-col">
+              <Picker disabled={true} mode="date" onChange={this.onDateChange}>
+                <AtList>
+                  <AtListItem
+                    title="日期"
+                    extraText={moment(dailyDetail.date).format(dateFormat)}
+                  />
+                </AtList>
+              </Picker>
+              <Picker
+                mode="selector"
+                range={this.state.selector}
+                onChange={this.onChange}
+                disabled={true}
+              >
+                <AtList>
+                  <AtListItem
+                    title="进度"
+                    extraText={this.getProgressStateInfo(
+                      dailyDetail.progressState
+                    )}
+                  />
+                </AtList>
+              </Picker>
+            </View>
 
-          <View className="two-col vc">
-            <Picker mode="date" onChange={this.onDateChange}>
-              <AtList>
-                <AtListItem
-                  title="计划完成时间"
-                  extraText={moment(dailyDetail.planOverTime).format(
-                    dateFormat
-                  )}
-                />
-              </AtList>
-            </Picker>
-            <Text>
-              倒计时{' '}
-              {!!dailyDetail.countdownDay
-                ? dailyDetail.countdownDay + ' 天'
-                : ' '}
-            </Text>
-          </View>
+            <View className="two-col">
+              <Picker
+                mode="selector"
+                range={this.state.selectorWeather}
+                onChange={this.onChange}
+                disabled={true}
+              >
+                <AtList>
+                  <AtListItem
+                    title="今日天气"
+                    extraText={
+                      dailyDetail.weather == null ? '' : dailyDetail.weather
+                    }
+                  />
+                </AtList>
+              </Picker>
+              <View className="vc">
+                <Text className="title">工人</Text>
+                <Text className="title">{dailyDetail.workersCount} 人</Text>
+              </View>
+            </View>
 
-          <View className="two-col">
-            <AtInput
-              disabled={true}
-              title="到场材料"
-              name="value"
-              type="number"
-              placeholder=""
-              value={
-                !!dailyDetail.arrivalMaterialText
-                  ? dailyDetail.arrivalMaterialText
-                  : '0' + '%'
-              }
-              onChange={this.handleChange.bind(this)}
-            />
-            <AtInput
-              disabled={true}
-              title="配送进展"
-              name="value"
-              type="text"
-              placeholder=""
-              value={dailyDetail.distributionJson}
-              onChange={this.handleChange.bind(this)}
-            />
-          </View>
+            <View className="two-col vc">
+              <Picker mode="date" onChange={this.onDateChange}>
+                <AtList>
+                  <AtListItem
+                    title="计划完成时间"
+                    extraText={moment(dailyDetail.planOverTime).format(
+                      dateFormat
+                    )}
+                  />
+                </AtList>
+              </Picker>
+              <Text>
+                倒计时{' '}
+                {!!dailyDetail.countdownDay
+                  ? dailyDetail.countdownDay + ' 天'
+                  : ' '}
+              </Text>
+            </View>
 
-          <View>
-            <Picker
-              mode="selector"
-              range={this.state.selectorWeather}
-              onChange={this.onChange}
-            >
-              <AtList>
-                <AtListItem
-                  title="进场材料"
-                  extraText={
-                    !!dailyDetail.arrivalMaterial
-                      ? dailyDetail.arrivalMaterial
-                      : ''
-                  }
-                />
-              </AtList>
-            </Picker>
-          </View>
+            <View className="two-col">
+              <AtInput
+                disabled={true}
+                title="到场材料"
+                name="value"
+                type="number"
+                placeholder=""
+                value={
+                  !!dailyDetail.arrivalMaterialText
+                    ? dailyDetail.arrivalMaterialText
+                    : '0' + '%'
+                }
+                onChange={this.handleChange.bind(this)}
+              />
+              <AtInput
+                disabled={true}
+                title="配送进展"
+                name="value"
+                type="text"
+                placeholder=""
+                value={dailyDetail.distributionJson}
+                onChange={this.handleChange.bind(this)}
+              />
+            </View>
 
-          <View className="vc">
-            <Text>今日施工内容：</Text>
-            <View></View>
-          </View>
-          <View style={{ display: 'flex', justifyContent: 'center' }}>
-            <Table
-              style={{
-                width: '100vw',
-              }}
-              colStyle={{ padding: '5px 5px' }}
-              columns={columns}
-              dataSource={dailyDetail.contents}
-              // ...你的配置
-            />
-          </View>
+            <View>
+              <Picker
+                mode="selector"
+                range={this.state.selectorWeather}
+                onChange={this.onChange}
+              >
+                <AtList>
+                  <AtListItem
+                    title="进场材料"
+                    extraText={
+                      !!dailyDetail.arrivalMaterial
+                        ? dailyDetail.arrivalMaterial
+                        : ''
+                    }
+                  />
+                </AtList>
+              </Picker>
+            </View>
 
-          <View className="vc">
-            <Text>明日施工计划：</Text>
-            <View></View>
-          </View>
-          <View style={{ display: 'flex', justifyContent: 'center' }}>
-            <Table
-              style={{
-                width: '100vw',
-              }}
-              colStyle={{ padding: '5px 5px' }}
-              columns={columns}
-              dataSource={dailyDetail.tomorrowContents}
-              // ...你的配置
-            />
-          </View>
+            <View className="vc">
+              <Text>今日施工内容：</Text>
+              <View></View>
+            </View>
+            <View style={{ display: 'flex', justifyContent: 'center' }}>
+              <Table
+                style={{
+                  width: '100vw',
+                }}
+                colStyle={{ padding: '5px 5px' }}
+                columns={columns}
+                dataSource={dailyDetail.contents}
+                rowKey="id"
+              />
+            </View>
 
-          <View>
-            <Text>现场照片</Text>
-          </View>
-          <View>
-            <AtImagePicker
-              showAddBtn={false}
-              className="attachment-readonly"
-              onImageClick={this.onImageClick}
-              files={this.showDailyDocumnet()}
-              onChange={() => {}}
-            />
-          </View>
+            <View className="vc">
+              <Text>明日施工计划：</Text>
+              <View></View>
+            </View>
+            <View style={{ display: 'flex', justifyContent: 'center' }}>
+              <Table
+                style={{
+                  width: '100vw',
+                }}
+                colStyle={{ padding: '5px 5px' }}
+                columns={columns}
+                dataSource={dailyDetail.tomorrowContents}
+                rowKey="id"
+              />
+            </View>
 
-          <View>
-            <Text>定点照片</Text>
-          </View>
-          <View>
-            <AtImagePicker
-              showAddBtn={false}
-              className="attachment-readonly"
-              onImageClick={this.onImage2Click}
-              files={this.showDailyProjectPhotos()}
-              onChange={this.onImgChange.bind(this)}
-            />
-          </View>
+            <View>
+              <Text>现场照片</Text>
+            </View>
+            <View>
+              <AtImagePicker
+                showAddBtn={false}
+                className="attachment-readonly"
+                onImageClick={this.onImageClick}
+                files={this.showDailyDocumnet()}
+                onChange={() => {}}
+              />
+            </View>
 
-          <View className="vc">
-            <Picker
-              disabled={true}
-              mode="selector"
-              range={this.state.selectorWeather}
-              onChange={this.onChange}
-            >
-              <AtList>
-                <AtListItem
-                  title="明日天气"
-                  extraText={
-                    !!dailyDetail.tomorrowWeather
-                      ? dailyDetail.tomorrowWeather
-                      : ''
-                  }
-                />
-              </AtList>
-            </Picker>
-          </View>
+            <View>
+              <Text>定点照片</Text>
+            </View>
+            <View>
+              <AtImagePicker
+                showAddBtn={false}
+                className="attachment-readonly"
+                onImageClick={this.onImage2Click}
+                files={this.showDailyProjectPhotos()}
+                onChange={this.onImgChange.bind(this)}
+              />
+            </View>
 
-          <View>
-            <Picker
-              mode="selector"
-              range={this.state.selectorWeather}
-              onChange={this.onChange}
-            >
-              <AtList>
-                <AtListItem
-                  title="明日进场材料"
-                  extraText={
-                    !!dailyDetail.tomorrowEnterMaterial
-                      ? dailyDetail.tomorrowEnterMaterial
-                      : ''
-                  }
-                />
-              </AtList>
-            </Picker>
-          </View>
+            <View className="vc">
+              <Picker
+                disabled={true}
+                mode="selector"
+                range={this.state.selectorWeather}
+                onChange={this.onChange}
+              >
+                <AtList>
+                  <AtListItem
+                    title="明日天气"
+                    extraText={
+                      !!dailyDetail.tomorrowWeather
+                        ? dailyDetail.tomorrowWeather
+                        : ''
+                    }
+                  />
+                </AtList>
+              </Picker>
+            </View>
 
-          <View className="one-col">
-            <Text>风险与协助:</Text>
-            <RichText
-              className="sum_content"
-              nodes={
-                dailyDetail.assistance !== null ? dailyDetail.assistance : ''
-              }
-            />
-          </View>
-          <View>
-            <Text>施工总结</Text>
-            <RichText
-              className="sum_content"
-              nodes={dailyDetail.summary !== null ? dailyDetail.summary : ''}
-            />
-          </View>
-          <View>
-            <Text>备注</Text>
-            <RichText
-              className="sum_content"
-              nodes={
-                dailyDetail.contentRemarks !== null
-                  ? dailyDetail.contentRemarks
-                  : ''
-              }
-            />
-          </View>
-          <View style={{ marginTop: '50rpx' }}>
-            <Text>&nbsp;&nbsp;</Text>
-          </View>
-        </AtForm>
+            <View>
+              <Picker
+                mode="selector"
+                range={this.state.selectorWeather}
+                onChange={this.onChange}
+              >
+                <AtList>
+                  <AtListItem
+                    title="明日进场材料"
+                    extraText={
+                      !!dailyDetail.tomorrowEnterMaterial
+                        ? dailyDetail.tomorrowEnterMaterial
+                        : ''
+                    }
+                  />
+                </AtList>
+              </Picker>
+            </View>
+
+            <View className="one-col">
+              <Text>风险与协助:</Text>
+              <RichText
+                className="sum_content"
+                nodes={
+                  dailyDetail.assistance !== null ? dailyDetail.assistance : ''
+                }
+              />
+            </View>
+            <View>
+              <Text>施工总结</Text>
+              <RichText
+                className="sum_content"
+                nodes={dailyDetail.summary !== null ? dailyDetail.summary : ''}
+              />
+            </View>
+            <View>
+              <Text>备注</Text>
+              <RichText
+                className="sum_content"
+                nodes={
+                  dailyDetail.contentRemarks !== null
+                    ? dailyDetail.contentRemarks
+                    : ''
+                }
+              />
+            </View>
+          </AtForm>
+        </View>
+        <View>
+          <AtButton
+            onClick={this.getDailyDetail}
+            className="edit-button"
+            full
+            type="primary"
+          >
+            编辑
+          </AtButton>
+        </View>
       </View>
     )
   }

@@ -707,12 +707,12 @@ class DailyEdit extends Component {
     const { projectDetail } = project
     const projectId = projectDetail.id
     const field = Object.assign(dailyDetail)
-    this.setState({
-      dataSource2:
-        field.distributionJson == null || field.distributionJson == ''
-          ? [{ first: '', last: '' }]
-          : JSON.parse(field.distributionJson),
-    })
+    // this.setState({
+    //   dataSource2:
+    //     field.distributionJson == null || field.distributionJson == ''
+    //       ? [{ first: '', last: '' }]
+    //       : JSON.parse(field.distributionJson),
+    // })
     const params = {
       projectId: projectId,
       dateTime: moment(this.state.date).valueOf(),
@@ -757,6 +757,23 @@ class DailyEdit extends Component {
           }),
         })
       }
+    })
+
+    this.setCurrentDailyDetail(field)
+  }
+
+  setCurrentDailyDetail = dd => {
+    let title = ''
+    if (!!dd.id) {
+      this.setState({
+        workersCount: dd.workersCount,
+      })
+      title = '日报编辑'
+    } else {
+      title = '日报填写'
+    }
+    Taro.setNavigationBarTitle({
+      title: title,
     })
   }
 
@@ -834,6 +851,10 @@ class DailyEdit extends Component {
       {},
       {
         contents: todayContents.map((item: any) => {
+          const { key, ...obj } = item
+          return obj
+        }),
+        tomorrowContents: tomorrowContents.map((item: any) => {
           const { key, ...obj } = item
           return obj
         }),

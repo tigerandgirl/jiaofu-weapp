@@ -75,7 +75,6 @@ class Index extends Component {
   }
 
   renderFunc = (item, index, pageIndex) => {
-    console.log('item=>', item)
     return (
       <View key={index} className="daily-list">
         <View
@@ -144,6 +143,43 @@ class Index extends Component {
   }
 
   goToEditDaily = () => {
+    const { dispatch } = this.props
+    dispatch({
+      type: 'daily/updateState',
+      payload: {
+        dailyDetail: {
+          id: null,
+          date: null,
+          title: null,
+          progressState: null,
+          weather: null,
+          windPower: null,
+          overallDescription: null,
+          contentRemarks: null,
+          workersCount: null,
+          material: null,
+          summary: null,
+          tomorrowPlanRemarks: null,
+          tomorrowWeather: null,
+          tomorrowWindPower: null,
+          tomorrowMaterial: null,
+          assistance: null,
+          saveType: null,
+          createTime: 0,
+          likeCount: 0,
+          commentCount: 0,
+          readCount: 0,
+          contents: [],
+          tomorrowContents: [],
+          projectId: null,
+          comments: [],
+          likeUsers: [],
+          dailyDocuments: [],
+          createUser: null,
+          createUserName: null,
+        },
+      },
+    })
     Taro.navigateTo({
       url: '/pages/daily/dailyedit',
     })
