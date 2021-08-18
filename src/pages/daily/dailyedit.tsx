@@ -22,6 +22,7 @@ import {
   AtIcon,
 } from 'taro-ui'
 import Table from 'taro3-table'
+import isArray from 'lodash/isArray'
 import { v4 as uuidv4 } from 'uuid'
 import moment from 'moment'
 import Config from '../../config'
@@ -766,7 +767,23 @@ class DailyEdit extends Component {
     let title = ''
     if (!!dd.id) {
       this.setState({
+        planOverTime: moment(dd.planOverTime).format(dateFormat),
+        progressState: dd.progressState,
+        weather: dd.weather,
+        tomorrowWeather: dd.tomorrowWeather,
         workersCount: dd.workersCount,
+        countdownDay: dd.countdownDay,
+        arrivalMaterialText: dd.arrivalMaterialText,
+        distributionJson: dd.distributionJson,
+        material: dd.material,
+        tomorrowMaterial: dd.tomorrowMaterial,
+        assistance: dd.assistance,
+        summary: dd.summary,
+        contentRemarks: dd.contentRemarks,
+        todayContents: dd.contents,
+        tomorrowContents: dd.tomorrowContents,
+        dailyDocuments: dd.dailyDocuments,
+        // ddDocuments:dd.
       })
       title = '日报编辑'
     } else {
@@ -775,6 +792,34 @@ class DailyEdit extends Component {
     Taro.setNavigationBarTitle({
       title: title,
     })
+  }
+
+  showDailyProjectPhotos = () => {
+    const { daily } = this.props
+    const { dailyDetail } = daily
+
+    let dds: any = []
+
+    if (
+      !!dailyDetail.dailyProjectPhotos &&
+      isArray(dailyDetail.dailyProjectPhotos)
+    ) {
+      dds = dailyDetail.dailyProjectPhotos
+        .map((item, index) => {
+          let imageDocs =
+            !!item.imageDocs &&
+            isArray(item.imageDocs) &&
+            item.imageDocs.length > 0
+              ? item.imageDocs[0]['fileUrl']
+              : ''
+          return Object.assign({}, { url: imageDocs, key: index })
+        })
+        .filter(item => {
+          return item.url !== null
+        })
+    }
+
+    return dds
   }
 
   handleChangeProductCategory = value => {
@@ -1270,7 +1315,7 @@ class DailyEdit extends Component {
             <AtImagePicker
               length={4}
               onImageClick={this.onImageClick2}
-              files={this.state.files2}
+              files={this.showDailyProjectPhotos()}
               onChange={this.onFileChangeDD.bind(this)}
             />
           </View>

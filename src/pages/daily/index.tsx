@@ -42,10 +42,24 @@ class Index extends Component {
 
   getTodayContentInfo = item => {
     if (item.contents.length >= 2) {
-      return `${item.contents[0]['position']}${item.contents[0]['productCategory']}完成${item.contents[0]['actualProgress']}%，${item.contents[1]['position']}${item.contents[1]['productCategory']}完成${item.contents[1]['actualProgress']}%`
+      return `${item.contents[0]['position']}${
+        !!item.contents[0]['productCategory']
+          ? item.contents[0]['productCategory']
+          : ''
+      }完成${item.contents[0]['actualProgress']}%，${
+        item.contents[1]['position']
+      }${
+        !!item.contents[1]['productCategory']
+          ? item.contents[1]['productCategory']
+          : ''
+      }完成${item.contents[1]['actualProgress']}%`
     }
     if (item.contents.length > 0) {
-      return `${item.contents[0]['position']}${item.contents[0]['productCategory']}完成${item.contents[0]['actualProgress']}%`
+      return `${item.contents[0]['position']}${
+        !!item.contents[0]['productCategory']
+          ? item.contents[0]['productCategory']
+          : ''
+      }完成${item.contents[0]['actualProgress']}%`
     }
   }
 
@@ -98,7 +112,7 @@ class Index extends Component {
                 src={u1366}
               />
             )}
-            <View className="daily-desc">
+            <View className="daily-desc" style={{ width: '100%' }}>
               <View className="daily-title">
                 <Text>{item.title}</Text>
               </View>
