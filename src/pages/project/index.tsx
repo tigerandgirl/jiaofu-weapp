@@ -94,23 +94,23 @@ class Index extends Component {
       >
         <View
           onClick={this.goToDaily}
-          style={{ marginTop: '40rpx', width: '400rpx' }}
+          style={{ marginTop: '90rpx', width: '400rpx' }}
         >
           <AtButton type="secondary" size="normal">
             日报
           </AtButton>
         </View>
-        <View style={{ marginTop: '40rpx', width: '400rpx' }}>
+        <View style={{ marginTop: '60rpx', width: '400rpx' }}>
           <AtButton type="secondary" size="normal">
             干系人
           </AtButton>
         </View>
-        <View style={{ marginTop: '40rpx', width: '400rpx' }}>
+        <View style={{ marginTop: '60rpx', width: '400rpx' }}>
           <AtButton type="secondary" size="normal">
             安全交底
           </AtButton>
         </View>
-        <View style={{ marginTop: '40rpx', width: '400rpx' }}>
+        <View style={{ marginTop: '60rpx', width: '400rpx' }}>
           <AtButton type="secondary" size="normal">
             物流信息
           </AtButton>

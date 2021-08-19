@@ -71,3 +71,11 @@ export async function getDetailWorkByPostionId(params: {}) {
     'getDetailWorkByPostionId'
   )
 }
+
+export async function getTomorrowContents(params: {}) {
+  return fetch.post(
+    Config.delivery.getTomorrowContents,
+    { query: Schemas.delivery.getTomorrowContents, variables: params },
+    'getTomorrowContents'
+  )
+}

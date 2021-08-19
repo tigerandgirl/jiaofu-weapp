@@ -249,6 +249,30 @@ class DailyView extends Component {
     })
   }
 
+  getProgressStateColor = state => {
+    let info = ''
+    if (state === 0) {
+      info = '#32cd32'
+    }
+    if (state === 1) {
+      info = '#4169e1'
+    }
+    if (state === 2) {
+      info = '#f59a23'
+    }
+    return info
+  }
+
+  isJsonString = str => {
+    try {
+      if (typeof JSON.parse(str) === 'object') {
+        return true
+      }
+    } catch (error) {
+      return false
+    }
+  }
+
   render() {
     const { daily } = this.props
     const { dailyDetail } = daily
@@ -282,110 +306,111 @@ class DailyView extends Component {
             onSubmit={this.onSubmit.bind(this)}
             onReset={this.onReset.bind(this)}
           >
-            {/* <View>
-              <AtInput
-                name="value"
-                title="标题"
-                type="text"
-                placeholder="标题"
-                value={dailyDetail.title}
-                onChange={this.handleChange.bind(this, 'value')}
-              />
-            </View> */}
-            <View className="two-col">
-              <AtList hasBorder={false}>
-                <AtListItem title={dailyDetail.title} hasBorder={false} />
-              </AtList>
-              <Picker
-                mode="selector"
-                range={this.state.selector}
-                onChange={this.onChange}
-                disabled={true}
-              >
-                <AtList>
-                  <AtListItem
-                    title="进度"
-                    extraText={this.getProgressStateInfo(
-                      dailyDetail.progressState
-                    )}
-                  />
-                </AtList>
-              </Picker>
-            </View>
+            <AtList hasBorder={false}>
+              <View className="at-row vc">
+                <View className="at-col  at-col-9">
+                  <View style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <AtListItem title={dailyDetail.title} hasBorder={false} />
+                  </View>
+                </View>
+                <View className="at-col at-col-3">
+                  <View className="vr">
+                    <Text
+                      style={{
+                        color: this.getProgressStateColor(
+                          dailyDetail.progressState
+                        ),
+                      }}
+                      className="pr20"
+                    >
+                      {this.getProgressStateInfo(dailyDetail.progressState)}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </AtList>
 
-            <View className="two-col">
-              <Picker
-                mode="selector"
-                range={this.state.selectorWeather}
-                onChange={this.onChange}
-                disabled={true}
-              >
-                <AtList>
+            <AtList>
+              <View className="at-row vc">
+                <View className="at-col">
                   <AtListItem
                     title="今日天气"
                     extraText={
                       dailyDetail.weather == null ? '' : dailyDetail.weather
                     }
+                    hasBorder={false}
                   />
-                </AtList>
-              </Picker>
-              <View className="vc">
-                <Text className="title">工人</Text>
-                <Text className="title">{dailyDetail.workersCount} 人</Text>
+                </View>
+                <View className="at-col ">
+                  <View className="vr">
+                    <Text className="title">工人</Text>
+                    <Text className="title">{dailyDetail.workersCount} 人</Text>
+                  </View>
+                </View>
               </View>
-            </View>
+            </AtList>
 
-            <View className="two-col vc">
-              <Picker mode="date" onChange={this.onDateChange}>
-                <AtList>
+            <AtList>
+              <View className="at-row vc">
+                <View className="at-col">
                   <AtListItem
                     title="计划完成时间"
                     extraText={moment(dailyDetail.planOverTime).format(
                       dateFormat
                     )}
+                    hasBorder={false}
                   />
-                </AtList>
-              </Picker>
-              <Text>
-                倒计时{' '}
-                {!!dailyDetail.countdownDay
-                  ? dailyDetail.countdownDay + ' 天'
-                  : ' '}
-              </Text>
-            </View>
+                </View>
+                <View className="at-col ">
+                  <View className="vr pr20">
+                    <Text>倒计时</Text>
+                    <Text>
+                      {!!dailyDetail.countdownDay
+                        ? dailyDetail.countdownDay + ' 天'
+                        : ' '}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </AtList>
 
-            <View className="two-col">
-              <AtInput
-                disabled={true}
-                title="到场材料"
-                name="value"
-                type="number"
-                placeholder=""
-                value={
-                  !!dailyDetail.arrivalMaterialText
-                    ? dailyDetail.arrivalMaterialText
-                    : '0' + '%'
-                }
-                onChange={this.handleChange.bind(this)}
-              />
-              <AtInput
-                disabled={true}
-                title="配送进展"
-                name="value"
-                type="text"
-                placeholder=""
-                value={dailyDetail.distributionJson}
-                onChange={this.handleChange.bind(this)}
-              />
-            </View>
+            <AtList>
+              <View className="at-row vc">
+                <View className="at-col ">
+                  <AtListItem
+                    title="配送进展"
+                    extraText={
+                      !!dailyDetail.distributionJson &&
+                      this.isJsonString(dailyDetail.distributionJson)
+                        ? ''
+                        : dailyDetail.distributionJson
+                    }
+                    hasBorder={false}
+                  />
+                </View>
+              </View>
+            </AtList>
 
-            <View>
-              <Picker
-                mode="selector"
-                range={this.state.selectorWeather}
-                onChange={this.onChange}
-              >
-                <AtList>
+            <AtList>
+              <View className="at-row">
+                <View className="at-col">
+                  <AtListItem
+                    title="到场材料"
+                    extraText={
+                      !!dailyDetail.arrivalMaterialText
+                        ? dailyDetail.arrivalMaterialText + '%'
+                        : '0' + '%'
+                    }
+                    hasBorder={false}
+                  />
+                </View>
+                <View className="at-col"></View>
+              </View>
+            </AtList>
+
+            <AtList>
+              <View className="at-row vc">
+                <View className="at-col">
                   <AtListItem
                     title="进场材料"
                     extraText={
@@ -393,13 +418,20 @@ class DailyView extends Component {
                         ? dailyDetail.arrivalMaterial
                         : ''
                     }
+                    hasBorder={false}
                   />
-                </AtList>
-              </Picker>
-            </View>
+                </View>
+                <View className="at-col"></View>
+              </View>
+            </AtList>
 
-            <View className="vc" style={{ marginTop: '30rpx' }}>
-              <Text>今日施工内容</Text>
+            <View
+              className="vc"
+              style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
+            >
+              <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+                今日施工内容
+              </Text>
               <View></View>
             </View>
             <View style={{ display: 'flex', justifyContent: 'center' }}>
@@ -414,8 +446,13 @@ class DailyView extends Component {
               />
             </View>
 
-            <View className="vc" style={{ marginTop: '30rpx' }}>
-              <Text>明日施工计划</Text>
+            <View
+              className="vc"
+              style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
+            >
+              <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+                明日施工计划
+              </Text>
               <View></View>
             </View>
             <View style={{ display: 'flex', justifyContent: 'center' }}>
@@ -430,8 +467,14 @@ class DailyView extends Component {
               />
             </View>
 
-            <View>
-              <Text>现场照片</Text>
+            <View
+              className="vc"
+              style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
+            >
+              <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+                现场照片
+              </Text>
+              <View></View>
             </View>
             <View>
               <AtImagePicker
@@ -443,8 +486,14 @@ class DailyView extends Component {
               />
             </View>
 
-            <View>
-              <Text>定点照片</Text>
+            <View
+              className="vc"
+              style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
+            >
+              <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+                定点照片
+              </Text>
+              <View></View>
             </View>
             <View>
               <AtImagePicker
@@ -456,14 +505,9 @@ class DailyView extends Component {
               />
             </View>
 
-            <View className="vc">
-              <Picker
-                disabled={true}
-                mode="selector"
-                range={this.state.selectorWeather}
-                onChange={this.onChange}
-              >
-                <AtList>
+            <AtList>
+              <View className="at-row vc">
+                <View className="at-col">
                   <AtListItem
                     title="明日天气"
                     extraText={
@@ -471,18 +515,16 @@ class DailyView extends Component {
                         ? dailyDetail.tomorrowWeather
                         : ''
                     }
+                    hasBorder={false}
                   />
-                </AtList>
-              </Picker>
-            </View>
+                </View>
+                <View className="at-col "></View>
+              </View>
+            </AtList>
 
-            <View>
-              <Picker
-                mode="selector"
-                range={this.state.selectorWeather}
-                onChange={this.onChange}
-              >
-                <AtList>
+            <AtList>
+              <View className="at-row vc">
+                <View className="at-col">
                   <AtListItem
                     title="明日进场材料"
                     extraText={
@@ -490,13 +532,23 @@ class DailyView extends Component {
                         ? dailyDetail.tomorrowEnterMaterial
                         : ''
                     }
+                    hasBorder={false}
                   />
-                </AtList>
-              </Picker>
-            </View>
+                </View>
+                <View className="at-col"></View>
+              </View>
+            </AtList>
 
-            <View className="one-col">
-              <Text>风险与协助:</Text>
+            <View
+              className="vc"
+              style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
+            >
+              <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+                风险与协助
+              </Text>
+              <View></View>
+            </View>
+            <View className="one-col" style={{ paddingLeft: '30rpx' }}>
               <RichText
                 className="sum_content"
                 nodes={
@@ -504,15 +556,34 @@ class DailyView extends Component {
                 }
               />
             </View>
-            <View>
-              <Text>施工总结</Text>
+
+            <View
+              className="vc"
+              style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
+            >
+              <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+                施工总结
+              </Text>
+              <View></View>
+            </View>
+            <View style={{ paddingLeft: '30rpx' }}>
+              <Text></Text>
               <RichText
                 className="sum_content"
                 nodes={dailyDetail.summary !== null ? dailyDetail.summary : ''}
               />
             </View>
-            <View>
-              <Text>备注</Text>
+
+            <View
+              className="vc"
+              style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
+            >
+              <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+                备注
+              </Text>
+              <View></View>
+            </View>
+            <View style={{ paddingLeft: '30rpx' }}>
               <RichText
                 className="sum_content"
                 nodes={

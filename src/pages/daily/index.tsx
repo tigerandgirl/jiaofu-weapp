@@ -77,6 +77,20 @@ class Index extends Component {
     return info
   }
 
+  getProgressStateColor = state => {
+    let info = ''
+    if (state === 0) {
+      info = '#32cd32'
+    }
+    if (state === 1) {
+      info = '#4169e1'
+    }
+    if (state === 2) {
+      info = '#f59a23'
+    }
+    return info
+  }
+
   getDailyById = params => {
     const { dispatch } = this.props
     dispatch({
@@ -102,13 +116,13 @@ class Index extends Component {
             item.dailyDocuments[0]['fileUrl'] !== null ? (
               <Image
                 className="home_img"
-                style="width: 110px;min-width:110px;height: 80px"
+                style="width: 130px;min-width:130px;height: 80px"
                 src={item.dailyDocuments[0]['fileUrl']}
               />
             ) : (
               <Image
                 className="home_img"
-                style="width: 110px;min-width:110px;height: 80px"
+                style="width: 130px;min-width:130px;height: 80px"
                 src={u1366}
               />
             )}
@@ -138,7 +152,11 @@ class Index extends Component {
               }}
             >
               <Text style={{ color: '#333' }}>进度: </Text>
-              <Text style={{ color: '#F59A23' }}>
+              <Text
+                style={{
+                  color: this.getProgressStateColor(item.progressState),
+                }}
+              >
                 {this.getProgressStateInfo(item.progressState)}
               </Text>
             </View>

@@ -534,6 +534,41 @@ class DailyEdit extends Component {
     })
   }
 
+  updateTomorrowContents = () => {
+    const { todayContents, date } = this.state
+    const { daily, project, dispatch } = this.props
+    const { projectDetail } = project
+    let newTodayContents = !!todayContents
+      ? todayContents.map((item, index) => {
+          const { key, productCategoryList, productDetailList, ...obj } = item
+          return obj
+        })
+      : []
+
+    const params = {
+      projectId: projectDetail.id,
+      contents: newTodayContents,
+      dateTime: moment(date).valueOf(),
+    }
+
+    dispatch({
+      type: 'daily/getTomorrowContents',
+      payload: params,
+    }).then(res => {
+      if (res && Array.isArray(res)) {
+        this.saveTomorrowContents(res)
+      }
+    })
+  }
+
+  saveTomorrowContents = dataSource => {
+    this.setState({
+      tomorrowContents: dataSource.map(item => {
+        return Object.assign(item, { type: 0 })
+      }),
+    })
+  }
+
   openFloatLayout = (type, record) => {
     this.setState({
       selectedRecord: record,
@@ -777,6 +812,8 @@ class DailyEdit extends Component {
         }
         this.setState({
           countdownDay: res.countdownDay,
+          todayContents:
+            !!res.contents && isArray(res.contents) ? res.contents : [],
         })
       }
     })
@@ -795,14 +832,20 @@ class DailyEdit extends Component {
         workersCount: dd.workersCount,
         countdownDay: dd.countdownDay,
         arrivalMaterialText: dd.arrivalMaterialText,
-        distributionJson: dd.distributionJson,
+        distributionJson:
+          !!dd.distributionJson && this.isJsonString(dd.distributionJson)
+            ? ''
+            : dd.distributionJson,
         material: dd.material,
         tomorrowMaterial: dd.tomorrowMaterial,
         assistance: dd.assistance,
         summary: dd.summary,
         contentRemarks: dd.contentRemarks,
-        todayContents: dd.contents,
-        tomorrowContents: dd.tomorrowContents,
+        todayContents: !!dd.contents && isArray(dd.contents) ? dd.contents : [],
+        tomorrowContents:
+          !!dd.tomorrowContents && isArray(dd.tomorrowContents)
+            ? dd.tomorrowContents
+            : [],
         dailyDocuments: dd.dailyDocuments,
         // ddDocuments:dd.
       })
@@ -973,6 +1016,16 @@ class DailyEdit extends Component {
         url: '/pages/daily/index',
       })
     })
+  }
+
+  isJsonString = str => {
+    try {
+      if (typeof JSON.parse(str) === 'object') {
+        return true
+      }
+    } catch (error) {
+      return false
+    }
   }
 
   render() {
@@ -1149,108 +1202,166 @@ class DailyEdit extends Component {
           onSubmit={this.onSubmit.bind(this)}
           onReset={this.onReset.bind(this)}
         >
-          <View>
-            <AtInput
-              name="value"
-              title="标题"
-              type="text"
-              placeholder="标题"
-              value={projectName}
-              onChange={value => {
-                this.handleChangeInfo('projectName', value)
-              }}
-            />
-          </View>
-          <View className="two-col">
-            <Picker mode="date" onChange={this.onDateChange}>
-              <AtList>
-                <AtListItem title="日期" extraText={this.state.date} />
-              </AtList>
-            </Picker>
-            <Picker
-              mode="selector"
-              range={this.state.selector}
-              onChange={this.onChange}
-            >
-              <AtList>
-                <AtListItem title="进度" extraText={this.state.progressState} />
-              </AtList>
-            </Picker>
-          </View>
-
-          <View className="two-col">
-            <Picker
-              mode="selector"
-              range={this.state.selectorWeather}
-              onChange={this.onChangeTodayWeather}
-            >
-              <AtList>
-                <AtListItem title="今日天气" extraText={this.state.weather} />
-              </AtList>
-            </Picker>
-            <View className="vc">
-              <Text className="title">工人</Text>
-              <AtInputNumber
-                min={0}
-                step={1}
-                value={this.state.workersCount}
-                onChange={this.handleChangeWorkersCount}
-              />
-            </View>
-          </View>
-
-          <View className="two-col">
-            <Picker mode="date" onChange={this.onPlanOverTimeChange}>
-              <AtList>
-                <AtListItem
-                  title="计划完成时间"
-                  extraText={this.state.planOverTime}
+          <AtList>
+            <View className="at-row vc">
+              <View className="at-col ">
+                <AtInput
+                  name="value"
+                  title="标题"
+                  type="text"
+                  placeholder="标题"
+                  value={projectName}
+                  onChange={value => {
+                    this.handleChangeInfo('projectName', value)
+                  }}
                 />
-              </AtList>
-            </Picker>
-            <View>
-              <Text>倒计时</Text>
-              <Text>{' ' + this.state.countdownDay + ' 天'}</Text>
+              </View>
             </View>
-          </View>
+          </AtList>
 
-          <View className="two-col">
-            <View style={{ display: 'flex', alignItems: 'center' }}>
-              <AtInput
-                title="到场材料"
-                name="arrivalMaterialText"
-                type="number"
-                placeholder="请输入"
-                value={arrivalMaterialText}
-                onChange={this.handleChangeDCCL}
-              />
-              <Text>%</Text>
+          <AtList>
+            <View className="at-row vc">
+              <View className="at-col">
+                <Picker mode="date" onChange={this.onDateChange}>
+                  <AtList>
+                    <AtListItem title="日期" extraText={this.state.date} />
+                  </AtList>
+                </Picker>
+              </View>
+              <View className="at-col">
+                <Picker
+                  mode="selector"
+                  range={this.state.selector}
+                  onChange={this.onChange}
+                >
+                  <AtList>
+                    <AtListItem
+                      title="进度"
+                      extraText={this.state.progressState}
+                    />
+                  </AtList>
+                </Picker>
+              </View>
             </View>
-            <AtInput
-              title="配送进展"
-              name="distributionJson"
-              type="text"
-              placeholder="请输入"
-              value={distributionJson}
-              onChange={this.handleChangePSJZ}
-            />
-          </View>
+          </AtList>
 
-          <View>
-            <AtInput
-              title="进场材料"
-              name="material"
-              type="text"
-              placeholder="请输入"
-              value={this.state.material}
-              onChange={this.handleChangeMaterial}
-            />
-          </View>
+          <AtList>
+            <View className="at-row vc">
+              <View className="at-col">
+                <Picker
+                  mode="selector"
+                  range={this.state.selectorWeather}
+                  onChange={this.onChangeTodayWeather}
+                >
+                  <AtList>
+                    <AtListItem
+                      title="今日天气"
+                      extraText={this.state.weather}
+                    />
+                  </AtList>
+                </Picker>
+              </View>
+              <View className="at-col">
+                <View className="vc pl30">
+                  <Text className="title">工人</Text>
+                  <AtInput
+                    border={false}
+                    type="text"
+                    value={this.state.workersCount}
+                    onChange={this.handleChangeWorkersCount}
+                  />
+                </View>
+              </View>
+            </View>
+          </AtList>
 
-          <View className="vc" style={{ marginTop: '30rpx' }}>
-            <Text>今日施工内容</Text>
+          <AtList>
+            <View className="at-row vc">
+              <View className="at-col">
+                <Picker mode="date" onChange={this.onPlanOverTimeChange}>
+                  <AtList>
+                    <AtListItem
+                      title="计划完成时间"
+                      extraText={this.state.planOverTime}
+                    />
+                  </AtList>
+                </Picker>
+              </View>
+              <View className="at-col ">
+                <View className="vr pr20">
+                  <Text>倒计时</Text>
+                  <Text>
+                    {!!this.state.countdownDay
+                      ? this.state.countdownDay + ' 天'
+                      : ' '}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </AtList>
+
+          <AtList>
+            <View className="at-row vc">
+              <View className="at-col ">
+                <AtInput
+                  border={false}
+                  title="配送进展"
+                  name="distributionJson"
+                  type="text"
+                  placeholder="请输入"
+                  value={distributionJson}
+                  onChange={this.handleChangePSJZ}
+                />
+              </View>
+            </View>
+          </AtList>
+
+          <AtList>
+            <View className="at-row">
+              <View className="at-col vcc">
+                <AtInput
+                  border={false}
+                  title="到场材料"
+                  name="arrivalMaterialText"
+                  type="number"
+                  placeholder="请输入"
+                  value={arrivalMaterialText}
+                  onChange={this.handleChangeDCCL}
+                />
+                <Text>%</Text>
+              </View>
+              <View className="at-col"></View>
+            </View>
+          </AtList>
+
+          <AtList>
+            <View className="at-row vc">
+              <View className="at-col">
+                <AtInput
+                  border={false}
+                  title="进场材料"
+                  name="material"
+                  type="text"
+                  placeholder="请输入"
+                  value={this.state.material}
+                  onChange={this.handleChangeMaterial}
+                />
+              </View>
+              <View className="at-col"></View>
+            </View>
+          </AtList>
+
+          <View
+            className="vc"
+            style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
+          >
+            <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+              今日施工内容
+            </Text>
             <View className="vc">
               <AtButton
+                className="ml15"
+                circle={true}
                 onClick={this.addTodayContent}
                 type="secondary"
                 size="small"
@@ -1258,6 +1369,8 @@ class DailyEdit extends Component {
                 添加内容
               </AtButton>
               <AtButton
+                className="ml15"
+                circle={true}
                 onClick={this.removeEndTodayContent}
                 type="secondary"
                 size="small"
@@ -1281,10 +1394,25 @@ class DailyEdit extends Component {
             />
           </View>
 
-          <View className="vc" style={{ marginTop: '30rpx' }}>
-            <Text>明日施工计划</Text>
+          <View
+            className="vc"
+            style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
+          >
+            <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+              明日施工计划
+            </Text>
             <View className="vc">
               <AtButton
+                circle={true}
+                onClick={this.updateTomorrowContents}
+                type="secondary"
+                size="small"
+              >
+                更新
+              </AtButton>
+              <AtButton
+                className="ml15"
+                circle={true}
                 onClick={this.addTomorrowContent}
                 type="secondary"
                 size="small"
@@ -1292,6 +1420,8 @@ class DailyEdit extends Component {
                 添加内容
               </AtButton>
               <AtButton
+                className="ml15"
+                circle={true}
                 onClick={this.removeEndTomorrowContent}
                 type="secondary"
                 size="small"
@@ -1315,8 +1445,14 @@ class DailyEdit extends Component {
             />
           </View>
 
-          <View>
-            <Text>现场照片/视频</Text>
+          <View
+            className="vc"
+            style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
+          >
+            <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+              现场照片
+            </Text>
+            <View></View>
           </View>
           <View>
             <AtImagePicker
@@ -1327,8 +1463,14 @@ class DailyEdit extends Component {
             />
           </View>
 
-          <View>
-            <Text>上传定点照片</Text>
+          <View
+            className="vc"
+            style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
+          >
+            <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+              定点照片
+            </Text>
+            <View></View>
           </View>
           <View>
             <AtImagePicker
@@ -1339,52 +1481,85 @@ class DailyEdit extends Component {
             />
           </View>
 
-          <View>
-            <Picker
-              mode="selector"
-              range={this.state.selectorTomorrowWeather}
-              onChange={this.onChangeTomorrow}
-            >
-              <AtList>
-                <AtListItem
-                  title="明日天气"
-                  extraText={this.state.tomorrowWeather}
+          <AtList>
+            <View className="at-row">
+              <View className="at-col">
+                <Picker
+                  mode="selector"
+                  range={this.state.selectorTomorrowWeather}
+                  onChange={this.onChangeTomorrow}
+                >
+                  <AtList>
+                    <AtListItem
+                      title="明日天气"
+                      extraText={this.state.tomorrowWeather}
+                    />
+                  </AtList>
+                </Picker>
+              </View>
+            </View>
+          </AtList>
+
+          <AtList>
+            <View className="at-row">
+              <View className="at-col">
+                <AtInput
+                  border={false}
+                  title="明日进场材料"
+                  name="tomorrowMaterial"
+                  type="text"
+                  placeholder="请输入"
+                  value={this.state.tomorrowMaterial}
+                  onChange={this.handleChangeTomorrowMaterial}
                 />
-              </AtList>
-            </Picker>
-          </View>
+              </View>
+            </View>
+          </AtList>
 
-          <View>
-            <AtInput
-              title="明日进场材料"
-              name="tomorrowMaterial"
-              type="text"
-              placeholder="请输入"
-              value={this.state.tomorrowMaterial}
-              onChange={this.handleChangeTomorrowMaterial}
-            />
+          <View
+            className="vc"
+            style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
+          >
+            <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+              风险与协助
+            </Text>
+            <View></View>
           </View>
-
           <View>
-            <AtInput
-              name="assistance"
-              title="风险与协助"
-              type="text"
-              placeholder="请输入"
+            <AtTextarea
               value={this.state.assistance}
               onChange={this.handleChangeAssistance}
+              placeholder="施工总结"
             />
           </View>
+
+          <View
+            className="vc"
+            style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
+          >
+            <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+              施工总结
+            </Text>
+            <View></View>
+          </View>
           <View>
-            <Text>施工总结</Text>
             <AtTextarea
               value={this.state.summary}
               onChange={this.handleChangeSummary}
               placeholder="施工总结"
             />
           </View>
+
+          <View
+            className="vc"
+            style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
+          >
+            <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+              备注
+            </Text>
+            <View></View>
+          </View>
           <View>
-            <Text>备注</Text>
             <AtTextarea
               value={this.state.contentRemarks}
               onChange={this.handleChangeContentRemarks}
