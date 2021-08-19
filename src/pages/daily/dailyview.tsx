@@ -282,7 +282,7 @@ class DailyView extends Component {
             onSubmit={this.onSubmit.bind(this)}
             onReset={this.onReset.bind(this)}
           >
-            <View>
+            {/* <View>
               <AtInput
                 name="value"
                 title="标题"
@@ -291,16 +291,11 @@ class DailyView extends Component {
                 value={dailyDetail.title}
                 onChange={this.handleChange.bind(this, 'value')}
               />
-            </View>
+            </View> */}
             <View className="two-col">
-              <Picker disabled={true} mode="date" onChange={this.onDateChange}>
-                <AtList>
-                  <AtListItem
-                    title="日期"
-                    extraText={moment(dailyDetail.date).format(dateFormat)}
-                  />
-                </AtList>
-              </Picker>
+              <AtList hasBorder={false}>
+                <AtListItem title={dailyDetail.title} hasBorder={false} />
+              </AtList>
               <Picker
                 mode="selector"
                 range={this.state.selector}
