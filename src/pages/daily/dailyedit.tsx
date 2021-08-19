@@ -1281,7 +1281,7 @@ class DailyEdit extends Component {
             />
           </View>
 
-          <View className="vc">
+          <View className="vc" style={{ marginTop: '30rpx' }}>
             <Text>明日施工计划</Text>
             <View className="vc">
               <AtButton

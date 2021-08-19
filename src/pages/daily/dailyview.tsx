@@ -403,8 +403,8 @@ class DailyView extends Component {
               </Picker>
             </View>
 
-            <View className="vc">
-              <Text>今日施工内容：</Text>
+            <View className="vc" style={{ marginTop: '30rpx' }}>
+              <Text>今日施工内容</Text>
               <View></View>
             </View>
             <View style={{ display: 'flex', justifyContent: 'center' }}>
@@ -419,8 +419,8 @@ class DailyView extends Component {
               />
             </View>
 
-            <View className="vc">
-              <Text>明日施工计划：</Text>
+            <View className="vc" style={{ marginTop: '30rpx' }}>
+              <Text>明日施工计划</Text>
               <View></View>
             </View>
             <View style={{ display: 'flex', justifyContent: 'center' }}>
