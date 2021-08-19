@@ -30,6 +30,7 @@ import './style.styl'
 type PageStateProps = {
   dispatch: Function
   daily: any
+  project: any
 }
 
 type IProps = PageStateProps
@@ -43,6 +44,7 @@ const dateFormat = 'YYYY-MM-DD'
 @connect(
   state => ({
     daily: state.daily,
+    project: state.project,
   }),
   dispatch => ({
     dispatch,
@@ -71,13 +73,14 @@ class DailyView extends Component {
     }
   }
 
-  // componentDidMount(){
-  //   const { dispatch } = this.props
-  //   dispatch({
-  //     type: 'daily/getDailyById',
-  //     payload: {id: "987956ca32fdaac1"},
-  //   })
-  // }
+  componentDidMount() {
+    const { project, daily } = this.props
+    const { projectDetail } = project
+    const { dailyDetail } = daily
+    Taro.setNavigationBarTitle({
+      title: projectDetail.name,
+    })
+  }
 
   handleChange(value) {
     this.setState({

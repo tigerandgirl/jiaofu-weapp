@@ -95,9 +95,12 @@ class DailyEdit extends Component {
     selectedField: null,
     drawerVisible: false,
     drawerVisible2: false,
+    drawerVisible3: false,
     productCategoryList: [],
     productCategoryList2: [],
     productCategoryValue: '',
+    progressKey: '',
+    progressValue: '',
     todayOrTomorrow: 1, //1:today,2:tomorrow
   }
 
@@ -547,6 +550,14 @@ class DailyEdit extends Component {
     })
   }
 
+  openFloatSetProgress = (type, record) => {
+    this.setState({
+      selectedRecord: record,
+      progressKey: type,
+      drawerVisible3: true,
+    })
+  }
+
   handleSetProdcut = () => {
     const { selectedRecord, productCategoryValue } = this.state
     this.handleEditTodayContent(
@@ -619,6 +630,26 @@ class DailyEdit extends Component {
 
     this.setState({
       drawerVisible2: false,
+    })
+  }
+
+  handleSetProgress = () => {
+    const {
+      selectedRecord,
+      todayOrTomorrow,
+      progressValue,
+      progressKey,
+    } = this.state
+    let obj = {}
+    obj[progressKey] = progressValue
+    if (todayOrTomorrow === 1) {
+      this.handleEditTodayContent(obj, selectedRecord)
+    } else {
+      this.handleEditTomorrowContent(obj, selectedRecord)
+    }
+
+    this.setState({
+      drawerVisible3: false,
     })
   }
 
@@ -708,12 +739,6 @@ class DailyEdit extends Component {
     const { projectDetail } = project
     const projectId = projectDetail.id
     const field = Object.assign(dailyDetail)
-    // this.setState({
-    //   dataSource2:
-    //     field.distributionJson == null || field.distributionJson == ''
-    //       ? [{ first: '', last: '' }]
-    //       : JSON.parse(field.distributionJson),
-    // })
     const params = {
       projectId: projectId,
       dateTime: moment(this.state.date).valueOf(),
@@ -751,11 +776,7 @@ class DailyEdit extends Component {
           })
         }
         this.setState({
-          daily: Object.assign({}, res, {
-            arrivalCount: res.arrivalCount == -1 ? null : field.arrivalCount,
-            installCount: res.installCount == -1 ? null : field.installCount,
-            onWayCount: res.onWayCount == -1 ? null : field.onWayCount,
-          }),
+          countdownDay: res.countdownDay,
         })
       }
     })
@@ -825,6 +846,12 @@ class DailyEdit extends Component {
   handleChangeProductCategory = value => {
     this.setState({
       productCategoryValue: value,
+    })
+  }
+
+  handleChangeProgress = value => {
+    this.setState({
+      progressValue: value,
     })
   }
 
@@ -955,9 +982,12 @@ class DailyEdit extends Component {
       tomorrowContents,
       drawerVisible,
       drawerVisible2,
+      drawerVisible3,
       productCategoryList,
       productCategoryList2,
       productCategoryValue,
+      progressKey,
+      progressValue,
       distributionJson,
       arrivalMaterialText,
     } = this.state
@@ -1009,33 +1039,30 @@ class DailyEdit extends Component {
         dataIndex: 'palnProgress',
         render: (text, record) => {
           return (
-            <AtInput
-              onBlur={value => {
-                this.handleEditTodayContent({ palnProgress: value }, record)
+            <View
+              onClick={() => {
+                this.setState({ todayOrTomorrow: 1, progressValue: '' })
+                this.openFloatSetProgress('palnProgress', record)
               }}
-              name="palnProgress"
-              placeholder="请输入"
-              type="text"
-              value={text}
-            />
+            >
+              {text === '0' ? '添加内容' : text}
+            </View>
           )
         },
       },
-
       {
         title: '实际进度',
         dataIndex: 'actualProgress',
         render: (text, record) => {
           return (
-            <AtInput
-              onBlur={value => {
-                this.handleEditTodayContent({ actualProgress: value }, record)
+            <View
+              onClick={() => {
+                this.setState({ todayOrTomorrow: 1, progressValue: '' })
+                this.openFloatSetProgress('actualProgress', record)
               }}
-              name="palnProgress"
-              placeholder="请输入"
-              type="text"
-              value={text}
-            />
+            >
+              {text === '0' ? '添加内容' : text}
+            </View>
           )
         },
       },
@@ -1086,15 +1113,14 @@ class DailyEdit extends Component {
         dataIndex: 'palnProgress',
         render: (text, record) => {
           return (
-            <AtInput
-              onBlur={value => {
-                this.handleEditTomorrowContent({ palnProgress: value }, record)
+            <View
+              onClick={() => {
+                this.setState({ todayOrTomorrow: 2, progressValue: '' })
+                this.openFloatSetProgress('palnProgress', record)
               }}
-              name="palnProgress"
-              placeholder="请输入"
-              type="text"
-              value={text}
-            />
+            >
+              {text === '0' ? '添加内容' : text}
+            </View>
           )
         },
       },
@@ -1104,18 +1130,14 @@ class DailyEdit extends Component {
         dataIndex: 'actualProgress',
         render: (text, record) => {
           return (
-            <AtInput
-              onBlur={value => {
-                this.handleEditTomorrowContent(
-                  { actualProgress: value },
-                  record
-                )
+            <View
+              onClick={() => {
+                this.setState({ todayOrTomorrow: 2, progressValue: '' })
+                this.openFloatSetProgress('actualProgress', record)
               }}
-              name="palnProgress"
-              placeholder="请输入"
-              type="text"
-              value={text}
-            />
+            >
+              {text === '0' ? '添加内容' : text}
+            </View>
           )
         },
       },
@@ -1177,7 +1199,7 @@ class DailyEdit extends Component {
             </View>
           </View>
 
-          <View style={{ display: 'flex', alignItems: 'center' }}>
+          <View className="two-col">
             <Picker mode="date" onChange={this.onPlanOverTimeChange}>
               <AtList>
                 <AtListItem
@@ -1186,13 +1208,10 @@ class DailyEdit extends Component {
                 />
               </AtList>
             </Picker>
-            <Text>倒计时</Text>
-            <AtInputNumber
-              min={0}
-              step={1}
-              value={this.state.countdownDay}
-              onChange={this.handleChangeCountDownDay}
-            />
+            <View>
+              <Text>倒计时</Text>
+              <Text>{' ' + this.state.countdownDay + ' 天'}</Text>
+            </View>
           </View>
 
           <View className="two-col">
@@ -1229,7 +1248,7 @@ class DailyEdit extends Component {
           </View>
 
           <View className="vc" style={{ marginTop: '30rpx' }}>
-            <Text>今日施工内容：</Text>
+            <Text>今日施工内容</Text>
             <View className="vc">
               <AtButton
                 onClick={this.addTodayContent}
@@ -1263,7 +1282,7 @@ class DailyEdit extends Component {
           </View>
 
           <View className="vc">
-            <Text>明日施工计划：</Text>
+            <Text>明日施工计划</Text>
             <View className="vc">
               <AtButton
                 onClick={this.addTomorrowContent}
@@ -1442,6 +1461,22 @@ class DailyEdit extends Component {
                 )
               })}
             </AtList>
+          </View>
+        </AtFloatLayout>
+        <AtFloatLayout isOpened={drawerVisible3}>
+          <View style={{ display: 'flex', alignItems: 'center' }}>
+            <View style={{ width: '90%' }}>
+              <AtInput
+                name="value"
+                type="text"
+                placeholder="手动输入内容"
+                value={progressValue}
+                onChange={this.handleChangeProgress}
+              />
+            </View>
+            <View onClick={this.handleSetProgress}>
+              <AtIcon value="check" size="20" color="#70bb48"></AtIcon>
+            </View>
           </View>
         </AtFloatLayout>
       </View>

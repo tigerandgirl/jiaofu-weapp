@@ -5,7 +5,7 @@
  * @Last Modified time: 2020-09-14 19:45:27
  */
 export default {
-  navigationBarTitleText: '日报浏览',
+  navigationBarTitleText: '',
   enablePullDownRefresh: true,
   backgroundTextStyle: 'dark',
 }
