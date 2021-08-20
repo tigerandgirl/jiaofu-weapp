@@ -261,11 +261,12 @@ class DailyEdit extends Component {
   // 上传
   onFileChange2(v, doType, index) {
     // doType代表操作类型，移除图片和添加图片,index为移除图片时返回的图片下标
+    console.log('v,doType,index', v, doType, index)
     const { dailyDocuments } = this.state
     if (doType === 'remove') {
       this.setState(() => {
         return {
-          files: v,
+          dailyDocuments: v,
         }
       })
       this.setState({
@@ -278,7 +279,7 @@ class DailyEdit extends Component {
       this.setState(
         () => {
           return {
-            files: v,
+            dailyDocuments: v,
           }
         },
         () => {
@@ -358,7 +359,7 @@ class DailyEdit extends Component {
     if (doType === 'remove') {
       this.setState(() => {
         return {
-          files2: v,
+          ddDocuments: v,
         }
       })
       this.setState({
@@ -371,7 +372,7 @@ class DailyEdit extends Component {
       this.setState(
         () => {
           return {
-            files2: v,
+            ddDocuments: v,
           }
         },
         () => {
@@ -805,9 +806,19 @@ class DailyEdit extends Component {
           Array.isArray(res.dailyProjectPhotos)
         ) {
           this.setState({
-            dailyDetail: Object.assign(field, {
-              dailyProjectPhotos: res.dailyProjectPhotos,
-            }),
+            ddDocuments: res.dailyProjectPhotos
+              .map((item: any, index) => {
+                let imageDocs =
+                  !!item.imageDocs &&
+                  isArray(item.imageDocs) &&
+                  item.imageDocs.length > 0
+                    ? item.imageDocs[0]['fileUrl']
+                    : ''
+                return Object.assign({}, { url: imageDocs, key: index })
+              })
+              .filter(item => {
+                return item.url !== null
+              }),
           })
         }
         this.setState({
@@ -846,8 +857,26 @@ class DailyEdit extends Component {
           !!dd.tomorrowContents && isArray(dd.tomorrowContents)
             ? dd.tomorrowContents
             : [],
-        dailyDocuments: dd.dailyDocuments,
-        // ddDocuments:dd.
+        dailyDocuments: dd.dailyDocuments
+          .map((item, index) => {
+            return Object.assign({}, item, { url: item.fileUrl, key: index })
+          })
+          .filter(item => {
+            return item.url !== null
+          }),
+        ddDocuments: dd.dailyProjectPhotos
+          .map((item: any, index) => {
+            let imageDocs =
+              !!item.imageDocs &&
+              isArray(item.imageDocs) &&
+              item.imageDocs.length > 0
+                ? item.imageDocs[0]['fileUrl']
+                : ''
+            return Object.assign({}, { url: imageDocs, key: index })
+          })
+          .filter(item => {
+            return item.url !== null
+          }),
       })
       title = '日报编辑'
     } else {
@@ -861,15 +890,13 @@ class DailyEdit extends Component {
   showDailyProjectPhotos = () => {
     const { daily } = this.props
     const { dailyDetail } = daily
+    const { ddDocuments } = this.state
 
     let dds: any = []
 
-    if (
-      !!dailyDetail.dailyProjectPhotos &&
-      isArray(dailyDetail.dailyProjectPhotos)
-    ) {
-      dds = dailyDetail.dailyProjectPhotos
-        .map((item, index) => {
+    if (!!ddDocuments && isArray(ddDocuments)) {
+      dds = ddDocuments
+        .map((item: any, index) => {
           let imageDocs =
             !!item.imageDocs &&
             isArray(item.imageDocs) &&
@@ -918,6 +945,7 @@ class DailyEdit extends Component {
       summary,
       contentRemarks,
       dailyDocuments,
+      ddDocuments,
       todayContents,
       tomorrowContents,
     } = this.state
@@ -988,6 +1016,23 @@ class DailyEdit extends Component {
             orders: index + 1,
           })
         }),
+        dailyProjectPhotos: ddDocuments.map((item: any, index) => {
+          return Object.assign(item, {
+            imageDocs:
+              item.imageDocs == null
+                ? []
+                : item.imageDocs.map(v => {
+                    return Object.assign(
+                      {},
+                      {
+                        id: v.id,
+                        name: v.name,
+                        fileUrl: v.fileUrl,
+                      }
+                    )
+                  }),
+          })
+        }),
         title: date + ' 日报',
         date: moment(date).valueOf(),
         planOverTime: moment(planOverTime).valueOf(),
@@ -1033,6 +1078,7 @@ class DailyEdit extends Component {
       projectName,
       todayContents,
       tomorrowContents,
+      ddDocuments,
       drawerVisible,
       drawerVisible2,
       drawerVisible3,
@@ -1457,7 +1503,7 @@ class DailyEdit extends Component {
           <View>
             <AtImagePicker
               multiple={true}
-              onImageClick={this.onImageClick1}
+              // onImageClick={this.onImageClick1}
               files={this.state.dailyDocuments}
               onChange={this.onFileChange2.bind(this)}
             />
@@ -1475,8 +1521,8 @@ class DailyEdit extends Component {
           <View>
             <AtImagePicker
               length={4}
-              onImageClick={this.onImageClick2}
-              files={this.showDailyProjectPhotos()}
+              // onImageClick={this.onImageClick2}
+              files={ddDocuments}
               onChange={this.onFileChangeDD.bind(this)}
             />
           </View>
