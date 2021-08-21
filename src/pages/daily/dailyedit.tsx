@@ -20,6 +20,8 @@ import {
   AtDrawer,
   AtFloatLayout,
   AtIcon,
+  AtMessage,
+  AtSwitch,
 } from 'taro-ui'
 import Table from 'taro3-table'
 import isArray from 'lodash/isArray'
@@ -76,7 +78,67 @@ class DailyEdit extends Component {
     todayContents: [],
     tomorrowContents: [],
     dailyDocuments: [],
-    ddDocuments: [], // 定点照片临时存储
+    ddDocuments: [
+      {
+        id: '',
+        projectId: '',
+        place: '',
+        imageDocs: [],
+        createTime: 0,
+      },
+      {
+        id: '',
+        projectId: '',
+        place: '',
+        imageDocs: [],
+        createTime: 0,
+      },
+      {
+        id: '',
+        projectId: '',
+        place: '',
+        imageDocs: [],
+        createTime: 0,
+      },
+      {
+        id: '',
+        projectId: '',
+        place: '',
+        imageDocs: [],
+        createTime: 0,
+      },
+    ], // 定点照片临时存储
+    ddDocumentsTmp: [
+      {
+        id: '',
+        projectId: '',
+        place: '',
+        imageDocs: [],
+        createTime: 0,
+      },
+      {
+        id: '',
+        projectId: '',
+        place: '',
+        imageDocs: [],
+        createTime: 0,
+      },
+      {
+        id: '',
+        projectId: '',
+        place: '',
+        imageDocs: [],
+        createTime: 0,
+      },
+      {
+        id: '',
+        projectId: '',
+        place: '',
+        imageDocs: [],
+        createTime: 0,
+      },
+    ],
+    ddDocumentsTmp2: [],
     buttonDisabled: false,
     imgList: [],
     daily: {
@@ -102,17 +164,58 @@ class DailyEdit extends Component {
     progressKey: '',
     progressValue: '',
     todayOrTomorrow: 1, //1:today,2:tomorrow
+    switchFlag: false,
   }
 
   componentWillMount() {
-    const { project } = this.props
+    const { project, daily } = this.props
     const { projectDetail } = project
+    const { dailyDetail } = daily
     this.setState({
       projectName: !!projectDetail['name'] ? projectDetail['name'] : '',
     })
 
-    this.getDailyInfo()
     this.getProductCategoryList()
+    if (dailyDetail.id === null) {
+      this.getDailyInfo()
+    } else {
+      this.setCurrentDailyDetail(dailyDetail)
+    }
+  }
+
+  componentDidMount() {
+    console.log(
+      'didm==============ddDocumentsTmp2===========================>',
+      this.state.ddDocumentsTmp2
+    )
+  }
+
+  getProgressStateInfo = state => {
+    let info = ''
+    if (state === 0) {
+      info = '正常'
+    }
+    if (state === 1) {
+      info = '提前'
+    }
+    if (state === 2) {
+      info = '延迟'
+    }
+    return info
+  }
+
+  getProgressStateByInfo = info => {
+    let state = 0
+    if (info === '正常') {
+      state = 0
+    }
+    if (info === '提前') {
+      state = 1
+    }
+    if (info === '延迟') {
+      state = 2
+    }
+    return state
   }
 
   getProductCategoryList = () => {
@@ -158,7 +261,7 @@ class DailyEdit extends Component {
 
   onChange = e => {
     this.setState({
-      selectorChecked: this.state.selector[e.detail.value],
+      progressState: this.state.selector[e.detail.value],
     })
   }
 
@@ -258,6 +361,380 @@ class DailyEdit extends Component {
     }
   }
 
+  getUploadRes = url => {
+    return new Promise((resolve, reject) => {
+      Taro.uploadFile({
+        url: Config.multiUpload,
+        filePath: url,
+        name: 'file',
+        header: {
+          'Content-Type': 'multipart/form-data',
+        },
+        formData: {
+          method: 'POST',
+          fileType: 1,
+        },
+        success: function (res) {
+          const data = JSON.parse(res.data).body
+          resolve(data)
+        },
+        fail: function () {
+          Taro.showToast({
+            title: '上传失败',
+            icon: 'none',
+          })
+        },
+        complete: () => {
+          Taro.hideLoading()
+          console.log('uploadfilecomplete')
+        },
+      })
+    })
+  }
+
+  // 上传
+  onFileChange3(v, doType, index) {
+    // doType代表操作类型，移除图片和添加图片,index为移除图片时返回的图片下标
+    console.log('v,doType,index', v, doType, index)
+    const { dailyDocuments } = this.state
+    if (doType === 'remove') {
+      this.setState(() => {
+        return {
+          dailyDocuments: v,
+        }
+      })
+      this.setState({
+        dailyDocuments: Object.assign([], v),
+      })
+    } else {
+      // 多张上传时，先去掉已经上传的图片，再上传新的图片
+      Taro.showLoading({
+        title: '上传中...',
+        mask: true,
+      })
+      // 新增
+      this.setState(
+        () => {
+          return {
+            dailyDocuments: v,
+          }
+        },
+        () => {
+          let that = this
+          // 已经上传的
+          const oldArray: any = dailyDocuments.filter((item: any) => {
+            return (
+              !!item.fileUrl &&
+              item.fileUrl.includes('xinlj.oss-cn-beijing.aliyuncs.com')
+            )
+          })
+
+          // 未上传的
+          const newArray = v.filter(vItem => {
+            return !vItem.fileUrl
+          })
+
+          console.log(
+            'oldArray, newArray=================================>',
+            oldArray,
+            newArray
+          )
+          let promises = newArray.map((item, index) => {
+            return this.getUploadRes(item['url'])
+          })
+
+          Promise.all(promises)
+            .then(allData => {
+              // console.log("allData==========================>", allData)
+
+              let newArr = allData.map((item: any) => {
+                return Object.assign(
+                  {},
+                  {
+                    fileId: item[0]['fileId'],
+                    fileName: item[0]['fileName'],
+                    filePath: item[0]['fileURL'],
+                    id: item[0]['id'],
+                    url: item[0]['fileURL'],
+                  }
+                )
+              })
+              console.log('newArr==========================>', newArr)
+              that.setState({
+                dailyDocuments: oldArray.concat(newArr),
+              })
+            })
+            .catch(err => {
+              console.log(err)
+              Taro.hideLoading()
+            })
+        }
+      )
+    }
+  }
+
+  // 上传
+  onFileChangeDD(v, doType, index) {
+    // doType代表操作类型，移除图片和添加图片,index为移除图片时返回的图片下标
+    console.log(
+      'v==========v, doType, index=======================>',
+      v,
+      doType,
+      index
+    )
+    const { ddDocuments } = this.state
+
+    if (doType === 'remove') {
+      this.setState(() => {
+        return {
+          ddDocuments: v,
+        }
+      })
+      this.setState({
+        ddDocuments: Object.assign([], v),
+      })
+    } else {
+      // 多张上传时，先去掉已经上传的图片，再上传新的图片
+      if (ddDocuments.length === 4) {
+        Taro.atMessage({
+          message: '最多上传4张照片',
+          type: 'warning',
+        })
+        return false
+      }
+
+      console.log('v=================================>', v)
+
+      // 新增
+      this.setState(
+        () => {
+          console.log('v====vvvvvvvvvvvvvvvvv=============================>', v)
+          return {
+            ddDocuments: v,
+          }
+        },
+        () => {
+          let that = this
+          // 已经上传的
+          console.log(
+            'v====已经上传的=============================>',
+            ddDocuments
+          )
+          const oldArray = ddDocuments.map(item => {
+            return item.fileId
+          })
+          // 未上传的
+          console.log('v====未上传的=============================>', v)
+          const newArray = v.filter(vitem => {
+            if (!oldArray.includes(vitem.fileId)) {
+              return vitem
+            }
+          })
+          //console.log(v, '上传图片数', oldArray, newArray)
+
+          // 循环上传
+          for (let i = 0; i < newArray.length; i++) {
+            console.log(
+              'v====循环上传=============================>',
+              newArray[i]
+            )
+            Taro.showLoading({
+              title: '上传中...',
+              mask: true,
+            })
+            //上传图片
+            Taro.uploadFile({
+              url: Config.multiUpload,
+              filePath: newArray[i].url,
+              name: 'file',
+              header: {
+                'Content-Type': 'multipart/form-data',
+              },
+              formData: {
+                method: 'POST',
+                fileType: 1,
+              },
+              success: function (res) {
+                console.log(
+                  'resupload================================================================>',
+                  res
+                )
+                const data = JSON.parse(res.data).body
+                console.log(
+                  'resupload================================================================>',
+                  data
+                )
+                // 保存附件
+                const attachments =
+                  ddDocuments == null
+                    ? []
+                    : JSON.parse(JSON.stringify(ddDocuments))
+                // 过滤已经上传的
+                // if (!attachments.includes(data[0].fileId)) {
+                //
+                // }
+
+                attachments.push({
+                  fileId: data[0].fileId,
+                  fileName: data[0].fileName,
+                  filePath: data[0].fileURL,
+                  id: data[0].id,
+                  url: data[0].fileURL,
+                })
+
+                that.setState({
+                  ddDocumentsTmp: attachments,
+                })
+              },
+              fail: function () {
+                Taro.hideLoading()
+                Taro.showToast({
+                  title: '上传失败',
+                  icon: 'none',
+                })
+              },
+              complete: () => {
+                Taro.hideLoading()
+              },
+            })
+          }
+        }
+      )
+    }
+  }
+
+  // 上传
+  onFileChange4(v, doType, index) {
+    // doType代表操作类型，移除图片和添加图片,index为移除图片时返回的图片下标
+    const { ddDocuments, ddDocumentsTmp } = this.state
+    if (doType === 'remove') {
+      this.setState(() => {
+        return {
+          ddDocuments: v,
+        }
+      })
+      this.setState({
+        ddDocuments: Object.assign([], v),
+      })
+    } else {
+      // 多张上传时，先去掉已经上传的图片，再上传新的图片
+      if (ddDocuments.length === 4) {
+        Taro.atMessage({
+          message: '最多上传4张照片',
+          type: 'warning',
+        })
+        return false
+      }
+      Taro.showLoading({
+        title: '上传中...',
+        mask: true,
+      })
+      // 新增
+      this.setState(
+        () => {
+          return {
+            ddDocuments: v,
+          }
+        },
+        () => {
+          let that = this
+          // 已经上传的
+          const oldArray: any = ddDocuments.filter((item: any) => {
+            return (
+              !!item.imageDocs &&
+              isArray(item.imageDocs) &&
+              item.imageDocs.length > 0 &&
+              item.imageDocs[0].fileUrl.includes(
+                'xinlj.oss-cn-beijing.aliyuncs.com'
+              )
+            )
+          })
+
+          // 未上传的
+          const newArray = v.filter((vItem: any) => {
+            return !vItem.imageDocs
+          })
+
+          console.log(
+            'oldArray, newArray=================================>',
+            oldArray,
+            newArray
+          )
+          let promises = newArray.map((item, index) => {
+            return this.getUploadRes(item['url'])
+          })
+
+          Promise.all(promises)
+            .then(allData => {
+              console.log('allData==========================>', allData)
+
+              let newdps = allData.map((item: any) => {
+                return Object.assign(
+                  {},
+                  {
+                    imageDocs: [
+                      {
+                        name: item[0]['fileName'],
+                        fileUrl: item[0]['fileURL'],
+                        id: item[0]['id'],
+                      },
+                    ],
+                  }
+                )
+              })
+              console.log('newArr==========================>', newdps)
+              console.log('ddDocuments==========================>', ddDocuments)
+              const nowDps = oldArray.concat(newdps)
+              const newDailyProjectPhotos = ddDocumentsTmp.map(
+                (ddtItem, index) => {
+                  let tmpDDitem = Object.assign(ddtItem)
+                  if (index < nowDps.length) {
+                    tmpDDitem = Object.assign(tmpDDitem, {
+                      imageDocs:
+                        tmpDDitem['imageDocs'].length === 0
+                          ? []
+                          : [
+                              Object.assign(tmpDDitem['imageDocs'][0], {
+                                name: nowDps[index]['imageDocs'][0]['name'],
+                                fileUrl:
+                                  nowDps[index]['imageDocs'][0]['fileUrl'],
+                                id: nowDps[index]['imageDocs'][0]['id'],
+                              }),
+                            ],
+                    })
+                  }
+                  return tmpDDitem
+                }
+              )
+
+              const tmpDD = newDailyProjectPhotos
+                .map((item: any, index) => {
+                  let imageDocs =
+                    !!item.imageDocs &&
+                    isArray(item.imageDocs) &&
+                    item.imageDocs.length > 0
+                      ? item.imageDocs[0]['fileUrl']
+                      : ''
+                  return Object.assign({}, item, { url: imageDocs, key: index })
+                })
+                .filter(item => {
+                  return item.url !== null
+                })
+
+              that.setState({
+                ddDocuments: tmpDD,
+                ddDocumentsTmp: newDailyProjectPhotos,
+              })
+            })
+            .catch(err => {
+              console.log(err)
+              Taro.hideLoading()
+            })
+        }
+      )
+    }
+  }
+
   // 上传
   onFileChange2(v, doType, index) {
     // doType代表操作类型，移除图片和添加图片,index为移除图片时返回的图片下标
@@ -286,7 +763,7 @@ class DailyEdit extends Component {
           let that = this
           // 已经上传的
           const oldArray = dailyDocuments.map(item => {
-            return item.fileId
+            return item.id
           })
           // 未上传的
           const newArray = v.filter(vitem => {
@@ -300,6 +777,7 @@ class DailyEdit extends Component {
           for (let i = 0; i < newArray.length; i++) {
             Taro.showLoading({
               title: '上传中...',
+              mask: true,
             })
             //上传图片
             Taro.uploadFile({
@@ -331,101 +809,9 @@ class DailyEdit extends Component {
                   id: data[0].id,
                   url: data[0].fileURL,
                 })
+                console.log('xczp=========================>', attachments)
                 that.setState({
                   dailyDocuments: Object.assign(attachments),
-                })
-              },
-              fail: function () {
-                Taro.hideLoading()
-                Taro.showToast({
-                  title: '上传失败',
-                  icon: 'none',
-                })
-              },
-              complete: () => {
-                Taro.hideLoading()
-              },
-            })
-          }
-        }
-      )
-    }
-  }
-
-  // 上传
-  onFileChangeDD(v, doType, index) {
-    // doType代表操作类型，移除图片和添加图片,index为移除图片时返回的图片下标
-    const { ddDocuments } = this.state
-    if (doType === 'remove') {
-      this.setState(() => {
-        return {
-          ddDocuments: v,
-        }
-      })
-      this.setState({
-        ddDocuments: Object.assign([], v),
-      })
-    } else {
-      // 多张上传时，先去掉已经上传的图片，再上传新的图片
-
-      // 新增
-      this.setState(
-        () => {
-          return {
-            ddDocuments: v,
-          }
-        },
-        () => {
-          let that = this
-          // 已经上传的
-          const oldArray = ddDocuments.map(item => {
-            return item.fileId
-          })
-          // 未上传的
-          const newArray = v.filter(vitem => {
-            if (!oldArray.includes(vitem.fileId)) {
-              return vitem
-            }
-          })
-          //console.log(v, '上传图片数', oldArray, newArray)
-
-          // 循环上传
-          for (let i = 0; i < newArray.length; i++) {
-            Taro.showLoading({
-              title: '上传中...',
-            })
-            //上传图片
-            Taro.uploadFile({
-              url: Config.multiUpload,
-              filePath: newArray[i].url,
-              name: 'file',
-              header: {
-                'Content-Type': 'multipart/form-data',
-              },
-              formData: {
-                method: 'POST',
-                fileType: 1,
-              },
-              success: function (res) {
-                const data = JSON.parse(res.data).body
-                // 保存附件
-                const attachments =
-                  ddDocuments == null
-                    ? []
-                    : JSON.parse(JSON.stringify(ddDocuments))
-                // 过滤已经上传的
-                // if (!attachments.includes(data[0].fileId)) {
-                //
-                // }
-                attachments.push({
-                  fileId: data[0].fileId,
-                  fileName: data[0].fileName,
-                  filePath: data[0].fileURL,
-                  id: data[0].id,
-                  url: data[0].fileURL,
-                })
-                that.setState({
-                  ddDocuments: Object.assign(attachments),
                 })
               },
               fail: function () {
@@ -728,23 +1114,6 @@ class DailyEdit extends Component {
     })
   }
 
-  handleEditTc = (type, value, record) => {
-    const { todayContents } = this.state
-    let newList = Object.assign(todayContents)
-    newList = newList.map((item: any, index: number) => {
-      if (record['key'] === index) {
-        let obj = {}
-        obj[type] = value
-        item = Object.assign(item, obj)
-      }
-      return item
-    })
-
-    this.setState({
-      todayContents: newList,
-    })
-  }
-
   removeTodayConent = () => {}
 
   addTommrowContent = () => {}
@@ -805,20 +1174,24 @@ class DailyEdit extends Component {
           res.dailyProjectPhotos != null &&
           Array.isArray(res.dailyProjectPhotos)
         ) {
+          const tmpDD = res.dailyProjectPhotos
+            .map((item: any, index) => {
+              let imageDocs =
+                !!item.imageDocs &&
+                isArray(item.imageDocs) &&
+                item.imageDocs.length > 0
+                  ? item.imageDocs[0]['fileUrl']
+                  : ''
+              return Object.assign({}, item, { url: imageDocs, key: index })
+            })
+            .filter(item => {
+              return item.url !== null
+            })
+
           this.setState({
-            ddDocuments: res.dailyProjectPhotos
-              .map((item: any, index) => {
-                let imageDocs =
-                  !!item.imageDocs &&
-                  isArray(item.imageDocs) &&
-                  item.imageDocs.length > 0
-                    ? item.imageDocs[0]['fileUrl']
-                    : ''
-                return Object.assign({}, { url: imageDocs, key: index })
-              })
-              .filter(item => {
-                return item.url !== null
-              }),
+            ddDocuments: tmpDD,
+            ddDocumentsTmp: res.dailyProjectPhotos,
+            ddDocumentsTmp2: tmpDD,
           })
         }
         this.setState({
@@ -828,16 +1201,33 @@ class DailyEdit extends Component {
         })
       }
     })
-
-    this.setCurrentDailyDetail(field)
   }
 
   setCurrentDailyDetail = dd => {
     let title = ''
     if (!!dd.id) {
+      const tmpDD = dd.dailyProjectPhotos
+        .map((item: any, index) => {
+          let imageDocs =
+            !!item.imageDocs &&
+            isArray(item.imageDocs) &&
+            item.imageDocs.length > 0
+              ? item.imageDocs[0]['fileUrl']
+              : ''
+          return Object.assign({}, item, { url: imageDocs, key: index })
+        })
+        .filter(item => {
+          return item.url !== null
+        })
+
+      console.log(
+        'tmpDD============setCurrentDailyDetail==============================>',
+        tmpDD
+      )
+
       this.setState({
         planOverTime: moment(dd.planOverTime).format(dateFormat),
-        progressState: dd.progressState,
+        progressState: this.getProgressStateInfo(dd.progressState),
         weather: dd.weather,
         tomorrowWeather: dd.tomorrowWeather,
         workersCount: dd.workersCount,
@@ -852,7 +1242,7 @@ class DailyEdit extends Component {
         assistance: dd.assistance,
         summary: dd.summary,
         contentRemarks: dd.contentRemarks,
-        todayContents: !!dd.contents && isArray(dd.contents) ? dd.contents : [],
+        todayContents: dd.contents,
         tomorrowContents:
           !!dd.tomorrowContents && isArray(dd.tomorrowContents)
             ? dd.tomorrowContents
@@ -864,19 +1254,9 @@ class DailyEdit extends Component {
           .filter(item => {
             return item.url !== null
           }),
-        ddDocuments: dd.dailyProjectPhotos
-          .map((item: any, index) => {
-            let imageDocs =
-              !!item.imageDocs &&
-              isArray(item.imageDocs) &&
-              item.imageDocs.length > 0
-                ? item.imageDocs[0]['fileUrl']
-                : ''
-            return Object.assign({}, { url: imageDocs, key: index })
-          })
-          .filter(item => {
-            return item.url !== null
-          }),
+        ddDocumentsTmp: dd.dailyProjectPhotos,
+        ddDocuments: tmpDD,
+        ddDocumentsTmp2: tmpDD,
       })
       title = '日报编辑'
     } else {
@@ -922,6 +1302,12 @@ class DailyEdit extends Component {
   handleChangeProgress = value => {
     this.setState({
       progressValue: value,
+    })
+  }
+
+  handleSwitchChange = value => {
+    this.setState({
+      switchFlag: value,
     })
   }
 
@@ -990,6 +1376,11 @@ class DailyEdit extends Component {
     })
     newDailyDocuments = [...new Set(newDailyDocuments)]
 
+    let newDDs = ddDocuments.map((item: any) => {
+      const { key, url, ...obj } = item
+      return obj
+    })
+
     let newDaily = Object.assign(
       {},
       {
@@ -1003,36 +1394,21 @@ class DailyEdit extends Component {
         }),
         weather: weather,
         tomorrowWeather: tomorrowWeather,
-        progressState: parseInt(progressState),
+        progressState: this.getProgressStateByInfo(progressState),
         workersCount: workersCount,
         countdownDay: countdownDay,
         arrivalMaterialText: arrivalMaterialText,
         material: material,
         tomorrowMaterial: tomorrowMaterial,
         distributionJson: distributionJson,
-        dailyDocuments: newDailyDocuments.map((item, index) => {
-          return Object.assign(item, {
+        dailyDocuments: newDailyDocuments.map((item: any, index) => {
+          const { key, url, ...obj } = item
+          return Object.assign(obj, {
             name: this.genDailyDocmentName(item, index),
             orders: index + 1,
           })
         }),
-        dailyProjectPhotos: ddDocuments.map((item: any, index) => {
-          return Object.assign(item, {
-            imageDocs:
-              item.imageDocs == null
-                ? []
-                : item.imageDocs.map(v => {
-                    return Object.assign(
-                      {},
-                      {
-                        id: v.id,
-                        name: v.name,
-                        fileUrl: v.fileUrl,
-                      }
-                    )
-                  }),
-          })
-        }),
+        dailyProjectPhotos: newDDs,
         title: date + ' 日报',
         date: moment(date).valueOf(),
         planOverTime: moment(planOverTime).valueOf(),
@@ -1042,6 +1418,7 @@ class DailyEdit extends Component {
         contentRemarks: contentRemarks,
       }
     )
+    // return false
     dispatch({
       type: 'daily/saveDaily',
       payload: { d: newDaily, saveType: 2 },
@@ -1144,7 +1521,7 @@ class DailyEdit extends Component {
                 this.openFloatSetProgress('palnProgress', record)
               }}
             >
-              {text === '0' ? '添加内容' : text}
+              {text === '0%' ? '添加内容' : text + '%'}
             </View>
           )
         },
@@ -1160,7 +1537,7 @@ class DailyEdit extends Component {
                 this.openFloatSetProgress('actualProgress', record)
               }}
             >
-              {text === '0' ? '添加内容' : text}
+              {text === '0%' ? '添加内容' : text + '%'}
             </View>
           )
         },
@@ -1210,6 +1587,7 @@ class DailyEdit extends Component {
       {
         title: '计划进度',
         dataIndex: 'palnProgress',
+        className: 'fe',
         render: (text, record) => {
           return (
             <View
@@ -1218,402 +1596,431 @@ class DailyEdit extends Component {
                 this.openFloatSetProgress('palnProgress', record)
               }}
             >
-              {text === '0' ? '添加内容' : text}
+              {text === '0%' ? '添加内容' : text + '%'}
             </View>
           )
         },
       },
 
-      {
-        title: '实际进度',
-        dataIndex: 'actualProgress',
-        render: (text, record) => {
-          return (
-            <View
-              onClick={() => {
-                this.setState({ todayOrTomorrow: 2, progressValue: '' })
-                this.openFloatSetProgress('actualProgress', record)
-              }}
-            >
-              {text === '0' ? '添加内容' : text}
-            </View>
-          )
-        },
-      },
+      // {
+      //   title: '实际进度',
+      //   dataIndex: 'actualProgress',
+      //   render: (text, record) => {
+      //     return (
+      //       <View
+      //         onClick={() => {
+      //           this.setState({ todayOrTomorrow: 2, progressValue: '' })
+      //           this.openFloatSetProgress('actualProgress', record)
+      //         }}
+      //       >
+      //         {text === '0%' ? '添加内容' : text + '%'}
+      //       </View>
+      //     )
+      //   },
+      // },
     ]
 
     return (
-      <View className="daily-edit">
-        <AtForm
-          onSubmit={this.onSubmit.bind(this)}
-          onReset={this.onReset.bind(this)}
-        >
-          <AtList>
-            <View className="at-row vc">
-              <View className="at-col ">
-                <AtInput
-                  name="value"
-                  title="标题"
-                  type="text"
-                  placeholder="标题"
-                  value={projectName}
-                  onChange={value => {
-                    this.handleChangeInfo('projectName', value)
-                  }}
-                />
-              </View>
-            </View>
-          </AtList>
-
-          <AtList>
-            <View className="at-row vc">
-              <View className="at-col">
-                <Picker mode="date" onChange={this.onDateChange}>
-                  <AtList>
-                    <AtListItem title="日期" extraText={this.state.date} />
-                  </AtList>
-                </Picker>
-              </View>
-              <View className="at-col">
-                <Picker
-                  mode="selector"
-                  range={this.state.selector}
-                  onChange={this.onChange}
-                >
-                  <AtList>
-                    <AtListItem
-                      title="进度"
-                      extraText={this.state.progressState}
-                    />
-                  </AtList>
-                </Picker>
-              </View>
-            </View>
-          </AtList>
-
-          <AtList>
-            <View className="at-row vc">
-              <View className="at-col">
-                <Picker
-                  mode="selector"
-                  range={this.state.selectorWeather}
-                  onChange={this.onChangeTodayWeather}
-                >
-                  <AtList>
-                    <AtListItem
-                      title="今日天气"
-                      extraText={this.state.weather}
-                    />
-                  </AtList>
-                </Picker>
-              </View>
-              <View className="at-col">
-                <View className="vc pl30">
-                  <Text className="title">工人</Text>
+      <View>
+        <View className="daily-edit">
+          <AtForm
+            onSubmit={this.onSubmit.bind(this)}
+            onReset={this.onReset.bind(this)}
+          >
+            <AtList>
+              <View className="at-row vc">
+                <View className="at-col ">
                   <AtInput
-                    border={false}
+                    name="value"
+                    title="标题"
                     type="text"
-                    value={this.state.workersCount}
-                    onChange={this.handleChangeWorkersCount}
+                    placeholder="标题"
+                    value={projectName}
+                    onChange={value => {
+                      this.handleChangeInfo('projectName', value)
+                    }}
                   />
                 </View>
               </View>
-            </View>
-          </AtList>
+            </AtList>
 
-          <AtList>
-            <View className="at-row vc">
-              <View className="at-col">
-                <Picker mode="date" onChange={this.onPlanOverTimeChange}>
-                  <AtList>
-                    <AtListItem
-                      title="计划完成时间"
-                      extraText={this.state.planOverTime}
-                    />
-                  </AtList>
-                </Picker>
-              </View>
-              <View className="at-col ">
-                <View className="vr pr20">
-                  <Text>倒计时</Text>
-                  <Text>
-                    {!!this.state.countdownDay
-                      ? this.state.countdownDay + ' 天'
-                      : ' '}
-                  </Text>
+            <AtList>
+              <View className="at-row vc">
+                <View className="at-col">
+                  <Picker mode="date" onChange={this.onDateChange}>
+                    <AtList>
+                      <AtListItem
+                        title="日期"
+                        extraText={this.state.date + ''}
+                      />
+                    </AtList>
+                  </Picker>
+                </View>
+                <View className="at-col">
+                  <Picker
+                    mode="selector"
+                    range={this.state.selector}
+                    onChange={this.onChange}
+                  >
+                    <AtList>
+                      <AtListItem
+                        title="进度"
+                        extraText={this.state.progressState + ''}
+                      />
+                    </AtList>
+                  </Picker>
                 </View>
               </View>
-            </View>
-          </AtList>
+            </AtList>
 
-          <AtList>
-            <View className="at-row vc">
-              <View className="at-col ">
-                <AtInput
-                  border={false}
-                  title="配送进展"
-                  name="distributionJson"
-                  type="text"
-                  placeholder="请输入"
-                  value={distributionJson}
-                  onChange={this.handleChangePSJZ}
-                />
-              </View>
-            </View>
-          </AtList>
-
-          <AtList>
-            <View className="at-row">
-              <View className="at-col vcc">
-                <AtInput
-                  border={false}
-                  title="到场材料"
-                  name="arrivalMaterialText"
-                  type="number"
-                  placeholder="请输入"
-                  value={arrivalMaterialText}
-                  onChange={this.handleChangeDCCL}
-                />
-                <Text>%</Text>
-              </View>
-              <View className="at-col"></View>
-            </View>
-          </AtList>
-
-          <AtList>
-            <View className="at-row vc">
-              <View className="at-col">
-                <AtInput
-                  border={false}
-                  title="进场材料"
-                  name="material"
-                  type="text"
-                  placeholder="请输入"
-                  value={this.state.material}
-                  onChange={this.handleChangeMaterial}
-                />
-              </View>
-              <View className="at-col"></View>
-            </View>
-          </AtList>
-
-          <View
-            className="vc"
-            style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
-          >
-            <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
-              今日施工内容
-            </Text>
-            <View className="vc">
-              <AtButton
-                className="ml15"
-                circle={true}
-                onClick={this.addTodayContent}
-                type="secondary"
-                size="small"
-              >
-                添加内容
-              </AtButton>
-              <AtButton
-                className="ml15"
-                circle={true}
-                onClick={this.removeEndTodayContent}
-                type="secondary"
-                size="small"
-              >
-                删除末行
-              </AtButton>
-            </View>
-          </View>
-          <View style={{ display: 'flex', justifyContent: 'center' }}>
-            <Table
-              onChange={v => {
-                // console.log('onChange -', v)
-              }}
-              style={{
-                width: '100vw',
-              }}
-              colStyle={{ padding: '5px 5px' }}
-              rowKey="key"
-              columns={columns}
-              dataSource={todayContents}
-            />
-          </View>
-
-          <View
-            className="vc"
-            style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
-          >
-            <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
-              明日施工计划
-            </Text>
-            <View className="vc">
-              <AtButton
-                circle={true}
-                onClick={this.updateTomorrowContents}
-                type="secondary"
-                size="small"
-              >
-                更新
-              </AtButton>
-              <AtButton
-                className="ml15"
-                circle={true}
-                onClick={this.addTomorrowContent}
-                type="secondary"
-                size="small"
-              >
-                添加内容
-              </AtButton>
-              <AtButton
-                className="ml15"
-                circle={true}
-                onClick={this.removeEndTomorrowContent}
-                type="secondary"
-                size="small"
-              >
-                删除末行
-              </AtButton>
-            </View>
-          </View>
-          <View style={{ display: 'flex', justifyContent: 'center' }}>
-            <Table
-              onChange={v => {
-                // console.log('onChange -', v)
-              }}
-              style={{
-                width: '100vw',
-              }}
-              colStyle={{ padding: '5px 5px' }}
-              rowKey="key"
-              columns={columns2}
-              dataSource={tomorrowContents}
-            />
-          </View>
-
-          <View
-            className="vc"
-            style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
-          >
-            <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
-              现场照片
-            </Text>
-            <View></View>
-          </View>
-          <View>
-            <AtImagePicker
-              multiple={true}
-              // onImageClick={this.onImageClick1}
-              files={this.state.dailyDocuments}
-              onChange={this.onFileChange2.bind(this)}
-            />
-          </View>
-
-          <View
-            className="vc"
-            style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
-          >
-            <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
-              定点照片
-            </Text>
-            <View></View>
-          </View>
-          <View>
-            <AtImagePicker
-              length={4}
-              // onImageClick={this.onImageClick2}
-              files={ddDocuments}
-              onChange={this.onFileChangeDD.bind(this)}
-            />
-          </View>
-
-          <AtList>
-            <View className="at-row">
-              <View className="at-col">
-                <Picker
-                  mode="selector"
-                  range={this.state.selectorTomorrowWeather}
-                  onChange={this.onChangeTomorrow}
-                >
-                  <AtList>
-                    <AtListItem
-                      title="明日天气"
-                      extraText={this.state.tomorrowWeather}
+            <AtList>
+              <View className="at-row vc">
+                <View className="at-col">
+                  <Picker
+                    mode="selector"
+                    range={this.state.selectorWeather}
+                    onChange={this.onChangeTodayWeather}
+                  >
+                    <AtList>
+                      <AtListItem
+                        title="今日天气"
+                        extraText={this.state.weather}
+                      />
+                    </AtList>
+                  </Picker>
+                </View>
+                <View className="at-col">
+                  <View className="vc pl30">
+                    <Text className="title">工人</Text>
+                    <AtInput
+                      border={false}
+                      type="text"
+                      value={this.state.workersCount}
+                      onChange={this.handleChangeWorkersCount}
                     />
-                  </AtList>
-                </Picker>
+                  </View>
+                </View>
+              </View>
+            </AtList>
+
+            <AtList>
+              <View className="at-row vc">
+                <View className="at-col">
+                  <Picker mode="date" onChange={this.onPlanOverTimeChange}>
+                    <AtList>
+                      <AtListItem
+                        title="计划完成时间"
+                        extraText={this.state.planOverTime + ''}
+                      />
+                    </AtList>
+                  </Picker>
+                </View>
+                <View className="at-col ">
+                  <View className="vr pr20">
+                    <Text>倒计时</Text>
+                    <Text className="ml15">
+                      {!!this.state.countdownDay
+                        ? this.state.countdownDay + ' 天'
+                        : '0 天'}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </AtList>
+
+            <AtList>
+              <View className="at-row vc">
+                <View className="at-col ">
+                  <AtInput
+                    border={false}
+                    title="配送进展"
+                    name="distributionJson"
+                    type="text"
+                    placeholder="请输入"
+                    value={distributionJson}
+                    onChange={this.handleChangePSJZ}
+                  />
+                </View>
+              </View>
+            </AtList>
+
+            <AtList>
+              <View className="at-row">
+                <View className="at-col vcc">
+                  <AtInput
+                    border={false}
+                    title="到场材料"
+                    name="arrivalMaterialText"
+                    type="number"
+                    placeholder="请输入"
+                    value={arrivalMaterialText}
+                    onChange={this.handleChangeDCCL}
+                  />
+                  <Text>%</Text>
+                </View>
+                <View className="at-col"></View>
+              </View>
+            </AtList>
+
+            <AtList>
+              <View className="at-row vc">
+                <View className="at-col">
+                  <AtInput
+                    border={false}
+                    title="进场材料"
+                    name="material"
+                    type="text"
+                    placeholder="请输入"
+                    value={this.state.material}
+                    onChange={this.handleChangeMaterial}
+                  />
+                </View>
+                <View className="at-col"></View>
+              </View>
+            </AtList>
+
+            <View
+              className="vc"
+              style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
+            >
+              <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+                今日施工内容
+              </Text>
+              <View className="vc">
+                <AtButton
+                  className="ml15"
+                  circle={true}
+                  onClick={this.addTodayContent}
+                  type="secondary"
+                  size="small"
+                >
+                  添加内容
+                </AtButton>
+                <AtButton
+                  className="ml15"
+                  circle={true}
+                  onClick={this.removeEndTodayContent}
+                  type="secondary"
+                  size="small"
+                >
+                  删除末行
+                </AtButton>
               </View>
             </View>
-          </AtList>
+            <View style={{ display: 'flex', justifyContent: 'center' }}>
+              <Table
+                style={{
+                  width: '100vw',
+                }}
+                colStyle={{
+                  padding: '5px 5px',
+                  display: 'flex',
+                  justifyContent: 'center',
+                }}
+                rowKey="key"
+                columns={columns}
+                dataSource={todayContents.map((item, index) => {
+                  return Object.assign(item, { key: index })
+                })}
+              />
+            </View>
 
-          <AtList>
-            <View className="at-row">
-              <View className="at-col">
-                <AtInput
-                  border={false}
-                  title="明日进场材料"
-                  name="tomorrowMaterial"
-                  type="text"
-                  placeholder="请输入"
-                  value={this.state.tomorrowMaterial}
-                  onChange={this.handleChangeTomorrowMaterial}
-                />
+            <View
+              className="vc"
+              style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
+            >
+              <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+                明日施工计划
+              </Text>
+              <View className="vc">
+                <AtButton
+                  circle={true}
+                  onClick={this.updateTomorrowContents}
+                  type="secondary"
+                  size="small"
+                >
+                  更新
+                </AtButton>
+                <AtButton
+                  className="ml15"
+                  circle={true}
+                  onClick={this.addTomorrowContent}
+                  type="secondary"
+                  size="small"
+                >
+                  添加内容
+                </AtButton>
+                <AtButton
+                  className="ml15"
+                  circle={true}
+                  onClick={this.removeEndTomorrowContent}
+                  type="secondary"
+                  size="small"
+                >
+                  删除末行
+                </AtButton>
               </View>
             </View>
-          </AtList>
+            <View style={{ display: 'flex', justifyContent: 'center' }}>
+              <Table
+                style={{
+                  width: '100vw',
+                }}
+                colStyle={{
+                  padding: '5px 5px',
+                  display: 'flex',
+                  justifyContent: 'center',
+                }}
+                rowKey="key"
+                columns={columns2}
+                dataSource={tomorrowContents.map((item, index) => {
+                  return Object.assign(item, { key: index })
+                })}
+              />
+            </View>
 
-          <View
-            className="vc"
-            style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
-          >
-            <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
-              风险与协助
-            </Text>
-            <View></View>
-          </View>
-          <View>
-            <AtTextarea
-              value={this.state.assistance}
-              onChange={this.handleChangeAssistance}
-              placeholder="施工总结"
-            />
-          </View>
+            <View
+              className="vc"
+              style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
+            >
+              <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+                现场照片
+              </Text>
+              <View></View>
+            </View>
+            <View>
+              <AtImagePicker
+                multiple={true}
+                // onImageClick={this.onImageClick1}
+                files={this.state.dailyDocuments}
+                onChange={this.onFileChange3.bind(this)}
+              />
+            </View>
 
-          <View
-            className="vc"
-            style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
-          >
-            <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
-              施工总结
-            </Text>
-            <View></View>
-          </View>
-          <View>
-            <AtTextarea
-              value={this.state.summary}
-              onChange={this.handleChangeSummary}
-              placeholder="施工总结"
-            />
-          </View>
+            <View
+              className="vc"
+              style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
+            >
+              <View>
+                <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+                  定点照片
+                </Text>
+                <Text
+                  style={{
+                    fontSize: '28rpx',
+                    paddingLeft: '12rpx',
+                    color: '#228B22',
+                  }}
+                >
+                  (请上传横向拍摄照片)
+                </Text>
+              </View>
+              <View></View>
+            </View>
+            <View>
+              <AtImagePicker
+                length={4}
+                multiple={true}
+                // onImageClick={this.onImageClick2}
+                files={ddDocuments}
+                onChange={this.onFileChange4.bind(this)}
+              />
+            </View>
 
-          <View
-            className="vc"
-            style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
-          >
-            <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
-              备注
-            </Text>
-            <View></View>
-          </View>
-          <View>
-            <AtTextarea
-              value={this.state.contentRemarks}
-              onChange={this.handleChangeContentRemarks}
-              placeholder="备注"
-            />
-          </View>
+            <AtList>
+              <View className="at-row">
+                <View className="at-col">
+                  <Picker
+                    mode="selector"
+                    range={this.state.selectorTomorrowWeather}
+                    onChange={this.onChangeTomorrow}
+                  >
+                    <AtList>
+                      <AtListItem
+                        title="明日天气"
+                        extraText={this.state.tomorrowWeather}
+                      />
+                    </AtList>
+                  </Picker>
+                </View>
+              </View>
+            </AtList>
 
+            <AtList>
+              <View className="at-row">
+                <View className="at-col">
+                  <AtInput
+                    border={false}
+                    title="明日进场材料"
+                    name="tomorrowMaterial"
+                    type="text"
+                    placeholder="请输入"
+                    value={this.state.tomorrowMaterial}
+                    onChange={this.handleChangeTomorrowMaterial}
+                  />
+                </View>
+              </View>
+            </AtList>
+
+            <View
+              className="vc"
+              style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
+            >
+              <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+                风险与协助
+              </Text>
+              <View></View>
+            </View>
+            <View>
+              <AtTextarea
+                value={this.state.assistance}
+                onChange={this.handleChangeAssistance}
+                placeholder="施工总结"
+              />
+            </View>
+
+            <View
+              style={{
+                marginTop: '30rpx',
+                marginBottom: '15rpx',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+                施工总结
+              </Text>
+              {/* <View><AtSwitch  checked={this.state.switchFlag} onChange={this.handleSwitchChange} /></View> */}
+            </View>
+            <View>
+              <AtTextarea
+                value={this.state.summary}
+                onChange={this.handleChangeSummary}
+                placeholder="施工总结"
+              />
+            </View>
+
+            <View
+              className="vc"
+              style={{ marginTop: '30rpx', marginBottom: '15rpx' }}
+            >
+              <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
+                备注
+              </Text>
+              <View></View>
+            </View>
+            <View>
+              <AtTextarea
+                value={this.state.contentRemarks}
+                onChange={this.handleChangeContentRemarks}
+                placeholder="备注"
+              />
+            </View>
+          </AtForm>
+        </View>
+        <View>
           <AtButton
+            type="primary"
             onClick={e => {
               this.submitPublish(e)
             }}
@@ -1621,8 +2028,15 @@ class DailyEdit extends Component {
           >
             提交
           </AtButton>
-        </AtForm>
-        <AtFloatLayout isOpened={drawerVisible}>
+        </View>
+        <AtFloatLayout
+          onClose={() => {
+            this.setState({
+              drawerVisible: false,
+            })
+          }}
+          isOpened={drawerVisible}
+        >
           <View style={{ display: 'flex', alignItems: 'center' }}>
             <View style={{ width: '90%' }}>
               <AtInput
@@ -1653,7 +2067,14 @@ class DailyEdit extends Component {
             </AtList>
           </View>
         </AtFloatLayout>
-        <AtFloatLayout isOpened={drawerVisible2}>
+        <AtFloatLayout
+          onClose={() => {
+            this.setState({
+              drawerVisible2: false,
+            })
+          }}
+          isOpened={drawerVisible2}
+        >
           <View style={{ display: 'flex', alignItems: 'center' }}>
             <View style={{ width: '90%' }}>
               <AtInput
@@ -1684,7 +2105,14 @@ class DailyEdit extends Component {
             </AtList>
           </View>
         </AtFloatLayout>
-        <AtFloatLayout isOpened={drawerVisible3}>
+        <AtFloatLayout
+          onClose={() => {
+            this.setState({
+              drawerVisible3: false,
+            })
+          }}
+          isOpened={drawerVisible3}
+        >
           <View style={{ display: 'flex', alignItems: 'center' }}>
             <View style={{ width: '90%' }}>
               <AtInput
@@ -1700,6 +2128,7 @@ class DailyEdit extends Component {
             </View>
           </View>
         </AtFloatLayout>
+        <AtMessage />
       </View>
     )
   }

@@ -291,11 +291,38 @@ class DailyView extends Component {
       {
         title: '计划进度',
         dataIndex: 'palnProgress',
+        render: (text, record) => {
+          return <View>{text === '0%' ? '添加内容' : text + '%'}</View>
+        },
       },
 
       {
         title: '实际进度',
         dataIndex: 'actualProgress',
+        render: (text, record) => {
+          return <View>{text === '0%' ? '添加内容' : text + '%'}</View>
+        },
+      },
+    ]
+
+    const columns2 = [
+      {
+        title: '楼栋',
+        dataIndex: 'position',
+      },
+
+      {
+        title: '施工任务',
+        dataIndex: 'productDetail',
+      },
+
+      {
+        title: '计划进度',
+        dataIndex: 'palnProgress',
+        className: 'fe',
+        render: (text, record) => {
+          return <View>{text === '0%' ? '添加内容' : text + '%'}</View>
+        },
       },
     ]
 
@@ -439,7 +466,11 @@ class DailyView extends Component {
                 style={{
                   width: '100vw',
                 }}
-                colStyle={{ padding: '5px 5px' }}
+                colStyle={{
+                  padding: '5px 5px',
+                  display: 'flex',
+                  justifyContent: 'center',
+                }}
                 columns={columns}
                 dataSource={dailyDetail.contents}
                 rowKey="id"
@@ -460,8 +491,12 @@ class DailyView extends Component {
                 style={{
                   width: '100vw',
                 }}
-                colStyle={{ padding: '5px 5px' }}
-                columns={columns}
+                colStyle={{
+                  padding: '5px 5px',
+                  display: 'flex',
+                  justifyContent: 'center',
+                }}
+                columns={columns2}
                 dataSource={dailyDetail.tomorrowContents}
                 rowKey="id"
               />

@@ -233,8 +233,8 @@ class Index extends Component {
             },
           }}
         />
-        <View>
-          <AtButton type="primary" onClick={this.goToEditDaily}>
+        <View className="add-btn">
+          <AtButton className="btn" type="primary" onClick={this.goToEditDaily}>
             日报填写
           </AtButton>
         </View>
