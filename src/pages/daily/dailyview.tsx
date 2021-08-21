@@ -427,7 +427,7 @@ class DailyView extends Component {
                     title="到场材料"
                     extraText={
                       !!dailyDetail.arrivalMaterialText
-                        ? dailyDetail.arrivalMaterialText + '%'
+                        ? parseInt(dailyDetail.arrivalMaterialText) + '%'
                         : '0' + '%'
                     }
                     hasBorder={false}

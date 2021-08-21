@@ -1010,6 +1010,25 @@ class DailyEdit extends Component {
     })
   }
 
+  handleSetCategoryCol2 = () => {
+    const { selectedRecord, productCategoryValue, todayOrTomorrow } = this.state
+    if (todayOrTomorrow === 1) {
+      this.handleEditTodayContent(
+        { productDetail: productCategoryValue, productDetailId: '' },
+        selectedRecord
+      )
+    } else {
+      this.handleEditTomorrowContent(
+        { productDetail: productCategoryValue, productDetailId: '' },
+        selectedRecord
+      )
+    }
+
+    this.setState({
+      drawerVisible2: false,
+    })
+  }
+
   handleSetCategory2 = value => {
     const { selectedRecord, todayOrTomorrow } = this.state
     if (todayOrTomorrow === 1) {
@@ -1488,7 +1507,7 @@ class DailyEdit extends Component {
           return (
             <View
               onClick={() => {
-                this.setState({ todayOrTomorrow: 1 })
+                this.setState({ todayOrTomorrow: 1, productCategoryValue: '' })
                 this.openFloatLayout('position', record)
               }}
             >
@@ -1510,7 +1529,7 @@ class DailyEdit extends Component {
                     datetime: 0,
                   })
                 }
-                this.setState({ todayOrTomorrow: 1 })
+                this.setState({ todayOrTomorrow: 1, productCategoryValue: '' })
                 this.openFloatLayout2('productDetail', record)
               }}
             >
@@ -1562,7 +1581,7 @@ class DailyEdit extends Component {
           return (
             <View
               onClick={() => {
-                this.setState({ todayOrTomorrow: 2 })
+                this.setState({ todayOrTomorrow: 2, productCategoryValue: '' })
                 this.openFloatLayout('position', record)
               }}
             >
@@ -1584,7 +1603,7 @@ class DailyEdit extends Component {
                     datetime: 0,
                   })
                 }
-                this.setState({ todayOrTomorrow: 2 })
+                this.setState({ todayOrTomorrow: 2, productCategoryValue: '' })
                 this.openFloatLayout2('productDetail', record)
               }}
             >
@@ -1764,7 +1783,7 @@ class DailyEdit extends Component {
                     name="arrivalMaterialText"
                     type="number"
                     placeholder="请输入"
-                    value={arrivalMaterialText}
+                    value={parseInt(arrivalMaterialText + '')}
                     onChange={this.handleChangeDCCL}
                   />
                   <Text>%</Text>
@@ -2070,11 +2089,13 @@ class DailyEdit extends Component {
           <View style={{ display: 'flex', alignItems: 'center' }}>
             <View style={{ width: '90%' }}>
               <AtInput
-                name="value"
+                name="positionInpu"
                 type="text"
                 placeholder="手动输入内容"
                 value={productCategoryValue}
-                onChange={this.handleChangeProductCategory}
+                onChange={value => {
+                  this.handleChangeProductCategory(value)
+                }}
               />
             </View>
             <View onClick={this.handleSetCategory}>
@@ -2108,14 +2129,16 @@ class DailyEdit extends Component {
           <View style={{ display: 'flex', alignItems: 'center' }}>
             <View style={{ width: '90%' }}>
               <AtInput
-                name="value"
+                name="positionCagetoryInput"
                 type="text"
                 placeholder="手动输入内容"
                 value={productCategoryValue}
-                onChange={this.handleChangeProductCategory}
+                onChange={value => {
+                  this.handleChangeProductCategory(value)
+                }}
               />
             </View>
-            <View onClick={this.handleSetCategory}>
+            <View onClick={this.handleSetCategoryCol2}>
               <AtIcon value="check" size="20" color="#70bb48"></AtIcon>
             </View>
           </View>
@@ -2146,7 +2169,7 @@ class DailyEdit extends Component {
           <View style={{ display: 'flex', alignItems: 'center' }}>
             <View style={{ width: '90%' }}>
               <AtInput
-                name="value"
+                name="progressValueInput"
                 type="text"
                 placeholder="手动输入内容"
                 value={progressValue}
