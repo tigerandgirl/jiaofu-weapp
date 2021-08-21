@@ -236,7 +236,7 @@ class DailyView extends Component {
           return Object.assign({}, { url: imageDocs, key: index })
         })
         .filter(item => {
-          return item.url !== null
+          return !!item.url
         })
     }
 

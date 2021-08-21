@@ -588,7 +588,7 @@ class DailyEdit extends Component {
                 })
               },
               complete: () => {
-                Taro.hideLoading()
+                // Taro.hideLoading()
               },
             })
           }
@@ -684,17 +684,20 @@ class DailyEdit extends Component {
                   let tmpDDitem = Object.assign(ddtItem)
                   if (index < nowDps.length) {
                     tmpDDitem = Object.assign(tmpDDitem, {
-                      imageDocs:
-                        tmpDDitem['imageDocs'].length === 0
-                          ? []
-                          : [
-                              Object.assign(tmpDDitem['imageDocs'][0], {
-                                name: nowDps[index]['imageDocs'][0]['name'],
-                                fileUrl:
-                                  nowDps[index]['imageDocs'][0]['fileUrl'],
-                                id: nowDps[index]['imageDocs'][0]['id'],
-                              }),
-                            ],
+                      imageDocs: [
+                        Object.assign(
+                          !!tmpDDitem['imageDocs'] &&
+                            isArray(tmpDDitem['imageDocs']) &&
+                            tmpDDitem['imageDocs'].length > 0
+                            ? tmpDDitem['imageDocs'][0]
+                            : {},
+                          {
+                            name: nowDps[index]['imageDocs'][0]['name'],
+                            fileUrl: nowDps[index]['imageDocs'][0]['fileUrl'],
+                            id: nowDps[index]['imageDocs'][0]['id'],
+                          }
+                        ),
+                      ],
                     })
                   }
                   return tmpDDitem
@@ -721,6 +724,7 @@ class DailyEdit extends Component {
                 ddDocuments: tmpDD,
                 // ddDocumentsTmp: newDailyProjectPhotos,
               })
+              Taro.hideLoading()
             })
             .catch(err => {
               console.log(err)
@@ -1213,7 +1217,7 @@ class DailyEdit extends Component {
           return Object.assign({}, item, { url: imageDocs, key: index })
         })
         .filter(item => {
-          return item.url !== null
+          return !!item.url
         })
 
       this.setState({
