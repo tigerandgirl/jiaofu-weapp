@@ -382,19 +382,21 @@ class DailyView extends Component {
                 <View className="at-col">
                   <AtListItem
                     title="计划完成时间"
-                    extraText={moment(dailyDetail.planOverTime).format(
-                      dateFormat
-                    )}
+                    extraText={
+                      dailyDetail.planOverTime === 0
+                        ? '无'
+                        : moment(dailyDetail.planOverTime).format(dateFormat)
+                    }
                     hasBorder={false}
                   />
                 </View>
                 <View className="at-col ">
                   <View className="vr pr20">
                     <Text>倒计时</Text>
-                    <Text>
+                    <Text className="ml15">
                       {!!dailyDetail.countdownDay
                         ? dailyDetail.countdownDay + ' 天'
-                        : ' '}
+                        : '0 天'}
                     </Text>
                   </View>
                 </View>

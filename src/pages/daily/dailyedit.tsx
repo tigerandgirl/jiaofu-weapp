@@ -165,6 +165,7 @@ class DailyEdit extends Component {
     progressValue: '',
     todayOrTomorrow: 1, //1:today,2:tomorrow
     switchFlag: false,
+    summaryShare: 0,
   }
 
   componentWillMount() {
@@ -181,13 +182,6 @@ class DailyEdit extends Component {
     } else {
       this.setCurrentDailyDetail(dailyDetail)
     }
-  }
-
-  componentDidMount() {
-    console.log(
-      'didm==============ddDocumentsTmp2===========================>',
-      this.state.ddDocumentsTmp2
-    )
   }
 
   getProgressStateInfo = state => {
@@ -685,8 +679,8 @@ class DailyEdit extends Component {
               console.log('newArr==========================>', newdps)
               console.log('ddDocuments==========================>', ddDocuments)
               const nowDps = oldArray.concat(newdps)
-              const newDailyProjectPhotos = ddDocumentsTmp.map(
-                (ddtItem, index) => {
+              const newDailyProjectPhotos = ddDocumentsTmp
+                .map((ddtItem, index) => {
                   let tmpDDitem = Object.assign(ddtItem)
                   if (index < nowDps.length) {
                     tmpDDitem = Object.assign(tmpDDitem, {
@@ -704,8 +698,10 @@ class DailyEdit extends Component {
                     })
                   }
                   return tmpDDitem
-                }
-              )
+                })
+                .filter((item, index) => {
+                  return index < nowDps.length
+                })
 
               const tmpDD = newDailyProjectPhotos
                 .map((item: any, index) => {
@@ -723,7 +719,7 @@ class DailyEdit extends Component {
 
               that.setState({
                 ddDocuments: tmpDD,
-                ddDocumentsTmp: newDailyProjectPhotos,
+                // ddDocumentsTmp: newDailyProjectPhotos,
               })
             })
             .catch(err => {
@@ -1220,11 +1216,6 @@ class DailyEdit extends Component {
           return item.url !== null
         })
 
-      console.log(
-        'tmpDD============setCurrentDailyDetail==============================>',
-        tmpDD
-      )
-
       this.setState({
         planOverTime: moment(dd.planOverTime).format(dateFormat),
         progressState: this.getProgressStateInfo(dd.progressState),
@@ -1241,6 +1232,7 @@ class DailyEdit extends Component {
         tomorrowMaterial: dd.tomorrowMaterial,
         assistance: dd.assistance,
         summary: dd.summary,
+        summaryShare: dd.summaryShare,
         contentRemarks: dd.contentRemarks,
         todayContents: dd.contents,
         tomorrowContents:
@@ -1307,7 +1299,7 @@ class DailyEdit extends Component {
 
   handleSwitchChange = value => {
     this.setState({
-      switchFlag: value,
+      summaryShare: value ? 1 : 0,
     })
   }
 
@@ -1315,6 +1307,7 @@ class DailyEdit extends Component {
     e.preventDefault()
     const { project, daily, dispatch } = this.props
     const { projectDetail } = project
+    const { dailyDetail } = daily
     const {
       date,
       planOverTime,
@@ -1329,12 +1322,21 @@ class DailyEdit extends Component {
       tomorrowMaterial,
       assistance,
       summary,
+      summaryShare,
       contentRemarks,
       dailyDocuments,
       ddDocuments,
       todayContents,
       tomorrowContents,
     } = this.state
+
+    if (ddDocuments.length < 4) {
+      Taro.atMessage({
+        message: '定点照片需要上传4张',
+        type: 'warning',
+      })
+      return false
+    }
 
     let newDailyDocuments = dailyDocuments.map((item: any, index) => {
       if (item) {
@@ -1414,10 +1416,14 @@ class DailyEdit extends Component {
         planOverTime: moment(planOverTime).valueOf(),
         projectId: projectDetail.id,
         summary: summary,
+        summaryShare: summaryShare,
         assistance: assistance,
         contentRemarks: contentRemarks,
       }
     )
+    if (dailyDetail.id !== null) {
+      newDaily = Object.assign(dailyDetail, newDaily)
+    }
     // return false
     dispatch({
       type: 'daily/saveDaily',
@@ -1462,13 +1468,13 @@ class DailyEdit extends Component {
       productCategoryList,
       productCategoryList2,
       productCategoryValue,
-      progressKey,
       progressValue,
       distributionJson,
       arrivalMaterialText,
+      summaryShare,
     } = this.state
-    const { project } = this.props
-    const { projectDetail } = project
+    const { daily } = this.props
+    const { dailyDetail } = daily
 
     const columns: any = [
       {
@@ -1706,14 +1712,15 @@ class DailyEdit extends Component {
             <AtList>
               <View className="at-row vc">
                 <View className="at-col">
-                  <Picker mode="date" onChange={this.onPlanOverTimeChange}>
-                    <AtList>
-                      <AtListItem
-                        title="计划完成时间"
-                        extraText={this.state.planOverTime + ''}
-                      />
-                    </AtList>
-                  </Picker>
+                  <AtListItem
+                    title="计划完成时间"
+                    extraText={
+                      dailyDetail.planOverTime === 0
+                        ? '无'
+                        : moment(dailyDetail.planOverTime).format(dateFormat)
+                    }
+                    hasBorder={false}
+                  />
                 </View>
                 <View className="at-col ">
                   <View className="vr pr20">
@@ -1990,7 +1997,26 @@ class DailyEdit extends Component {
               <Text style={{ fontSize: '32rpx', paddingLeft: '24rpx' }}>
                 施工总结
               </Text>
-              {/* <View><AtSwitch  checked={this.state.switchFlag} onChange={this.handleSwitchChange} /></View> */}
+              <View>
+                <AtSwitch
+                  border={false}
+                  className="at-switch"
+                  color="#1abc9c"
+                  checked={summaryShare === 1 ? true : false}
+                  onChange={this.handleSwitchChange}
+                />
+              </View>
+              <View>
+                <Text
+                  style={{
+                    fontSize: '28rpx',
+                    paddingLeft: '12rpx',
+                    color: '#228B22',
+                  }}
+                >
+                  邮件自动发送外部客户(默认不发)
+                </Text>
+              </View>
             </View>
             <View>
               <AtTextarea
