@@ -355,102 +355,100 @@ class DailyView extends Component {
                   </View>
                 </View>
               </View>
-            </AtList>
 
-            <AtList>
-              <View className="at-row vc">
-                <View className="at-col">
-                  <AtListItem
-                    title="今日天气"
-                    extraText={
-                      dailyDetail.weather == null ? '' : dailyDetail.weather
-                    }
-                    hasBorder={false}
-                  />
-                </View>
-                <View className="at-col ">
-                  <View className="vr">
-                    <Text className="title">工人</Text>
-                    <Text className="title">{dailyDetail.workersCount} 人</Text>
+              <AtList>
+                <View className="at-row vc">
+                  <View className="at-col">
+                    <AtListItem
+                      title="今日天气"
+                      extraText={
+                        dailyDetail.weather == null ? '' : dailyDetail.weather
+                      }
+                      hasBorder={false}
+                    />
+                  </View>
+                  <View className="at-col ">
+                    <View className="vr">
+                      <Text className="title">工人</Text>
+                      <Text className="title">
+                        {dailyDetail.workersCount} 人
+                      </Text>
+                    </View>
                   </View>
                 </View>
-              </View>
-            </AtList>
-
-            <AtList>
-              <View className="at-row vc">
-                <View className="at-col">
-                  <AtListItem
-                    title="计划完成时间"
-                    extraText={
-                      dailyDetail.planOverTime === 0
-                        ? '无'
-                        : moment(dailyDetail.planOverTime).format(dateFormat)
-                    }
-                    hasBorder={false}
-                  />
-                </View>
-                <View className="at-col ">
-                  <View className="vr pr20">
-                    <Text>倒计时</Text>
-                    <Text className="ml15">
-                      {!!dailyDetail.countdownDay
-                        ? dailyDetail.countdownDay + ' 天'
-                        : '0 天'}
-                    </Text>
+              </AtList>
+              <AtList>
+                <View className="at-row vc">
+                  <View className="at-col">
+                    <AtListItem
+                      title="计划完成时间"
+                      extraText={
+                        dailyDetail.planOverTime === 0
+                          ? '无'
+                          : moment(dailyDetail.planOverTime).format(dateFormat)
+                      }
+                      hasBorder={false}
+                    />
+                  </View>
+                  <View className="at-col ">
+                    <View className="vr pr20">
+                      <Text>倒计时</Text>
+                      <Text className="ml15">
+                        {!!dailyDetail.countdownDay
+                          ? dailyDetail.countdownDay + ' 天'
+                          : '0 天'}
+                      </Text>
+                    </View>
                   </View>
                 </View>
-              </View>
-            </AtList>
+              </AtList>
 
-            <AtList>
-              <View className="at-row vc">
+              <View className="at-row">
                 <View className="at-col ">
-                  <AtListItem
+                  <AtInput
+                    editable={false}
+                    name="psjzinput"
                     title="配送进展"
-                    extraText={
+                    type="text"
+                    placeholder=""
+                    value={
                       !!dailyDetail.distributionJson &&
                       this.isJsonString(dailyDetail.distributionJson)
                         ? ''
                         : dailyDetail.distributionJson
                     }
-                    hasBorder={false}
                   />
                 </View>
               </View>
-            </AtList>
 
-            <AtList>
               <View className="at-row">
                 <View className="at-col">
-                  <AtListItem
+                  <AtInput
+                    editable={false}
+                    name="dcclinput"
                     title="到场材料"
-                    extraText={
+                    type="text"
+                    placeholder=""
+                    value={
                       !!dailyDetail.arrivalMaterialText
                         ? parseInt(dailyDetail.arrivalMaterialText) + '%'
                         : '0' + '%'
                     }
-                    hasBorder={false}
                   />
                 </View>
-                <View className="at-col"></View>
               </View>
-            </AtList>
 
-            <AtList>
               <View className="at-row vc">
                 <View className="at-col">
-                  <AtListItem
+                  <AtInput
+                    editable={false}
+                    name="gcclinput"
                     title="进场材料"
-                    extraText={
-                      !!dailyDetail.arrivalMaterial
-                        ? dailyDetail.arrivalMaterial
-                        : ''
-                    }
-                    hasBorder={false}
+                    type="text"
+                    placeholder=""
+                    value={!!dailyDetail.material ? dailyDetail.material : ''}
                   />
                 </View>
-                <View className="at-col"></View>
               </View>
             </AtList>
 

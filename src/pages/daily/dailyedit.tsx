@@ -1656,7 +1656,7 @@ class DailyEdit extends Component {
             onSubmit={this.onSubmit.bind(this)}
             onReset={this.onReset.bind(this)}
           >
-            <AtList>
+            <AtList hasBorder={false}>
               <View className="at-row vc">
                 <View className="at-col ">
                   <AtInput
@@ -1671,18 +1671,15 @@ class DailyEdit extends Component {
                   />
                 </View>
               </View>
-            </AtList>
 
-            <AtList>
               <View className="at-row vc">
                 <View className="at-col">
                   <Picker mode="date" onChange={this.onDateChange}>
-                    <AtList>
-                      <AtListItem
-                        title="日期"
-                        extraText={this.state.date + ''}
-                      />
-                    </AtList>
+                    <AtListItem
+                      title="日期"
+                      extraText={this.state.date + ''}
+                      hasBorder={false}
+                    />
                   </Picker>
                 </View>
                 <View className="at-col">
@@ -1691,48 +1688,44 @@ class DailyEdit extends Component {
                     range={this.state.selector}
                     onChange={this.onChange}
                   >
-                    <AtList>
-                      <AtListItem
-                        title="进度"
-                        extraText={this.state.progressState + ''}
-                      />
-                    </AtList>
+                    <AtListItem
+                      title="进度"
+                      extraText={this.state.progressState + ''}
+                      hasBorder={false}
+                    />
                   </Picker>
                 </View>
               </View>
-            </AtList>
 
-            <AtList>
-              <View className="at-row vc">
-                <View className="at-col">
-                  <Picker
-                    mode="selector"
-                    range={this.state.selectorWeather}
-                    onChange={this.onChangeTodayWeather}
-                  >
-                    <AtList>
+              <AtList>
+                <View className="at-row vc">
+                  <View className="at-col">
+                    <Picker
+                      mode="selector"
+                      range={this.state.selectorWeather}
+                      onChange={this.onChangeTodayWeather}
+                    >
                       <AtListItem
                         title="今日天气"
                         extraText={this.state.weather}
+                        hasBorder={false}
                       />
-                    </AtList>
-                  </Picker>
-                </View>
-                <View className="at-col">
-                  <View className="vc pl30">
-                    <Text className="title">工人</Text>
-                    <AtInput
-                      border={false}
-                      type="text"
-                      value={this.state.workersCount}
-                      onChange={this.handleChangeWorkersCount}
-                    />
+                    </Picker>
+                  </View>
+                  <View className="at-col">
+                    <View className="vc pl30">
+                      <Text className="title">工人</Text>
+                      <AtInput
+                        border={false}
+                        type="text"
+                        value={this.state.workersCount}
+                        onChange={this.handleChangeWorkersCount}
+                      />
+                    </View>
                   </View>
                 </View>
-              </View>
-            </AtList>
+              </AtList>
 
-            <AtList>
               <View className="at-row vc">
                 <View className="at-col">
                   <AtListItem
@@ -1756,25 +1749,23 @@ class DailyEdit extends Component {
                   </View>
                 </View>
               </View>
-            </AtList>
 
-            <AtList>
-              <View className="at-row vc">
-                <View className="at-col ">
-                  <AtInput
-                    border={false}
-                    title="配送进展"
-                    name="distributionJson"
-                    type="text"
-                    placeholder="请输入"
-                    value={distributionJson}
-                    onChange={this.handleChangePSJZ}
-                  />
+              <AtList>
+                <View className="at-row vc">
+                  <View className="at-col ">
+                    <AtInput
+                      border={false}
+                      title="配送进展"
+                      name="distributionJson"
+                      type="text"
+                      placeholder="请输入"
+                      value={distributionJson}
+                      onChange={this.handleChangePSJZ}
+                    />
+                  </View>
                 </View>
-              </View>
-            </AtList>
+              </AtList>
 
-            <AtList>
               <View className="at-row">
                 <View className="at-col vcc">
                   <AtInput
@@ -1790,23 +1781,23 @@ class DailyEdit extends Component {
                 </View>
                 <View className="at-col"></View>
               </View>
-            </AtList>
 
-            <AtList>
-              <View className="at-row vc">
-                <View className="at-col">
-                  <AtInput
-                    border={false}
-                    title="进场材料"
-                    name="material"
-                    type="text"
-                    placeholder="请输入"
-                    value={this.state.material}
-                    onChange={this.handleChangeMaterial}
-                  />
+              <AtList>
+                <View className="at-row">
+                  <View className="at-col">
+                    <AtInput
+                      border={false}
+                      title="进场材料"
+                      name="material"
+                      type="text"
+                      placeholder="请输入"
+                      value={this.state.material}
+                      onChange={this.handleChangeMaterial}
+                    />
+                  </View>
+                  <View className="at-col"></View>
                 </View>
-                <View className="at-col"></View>
-              </View>
+              </AtList>
             </AtList>
 
             <View
