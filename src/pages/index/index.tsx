@@ -83,7 +83,8 @@ class Index extends Component {
   }
 
   getProjectPageList = () => {
-    const { dispatch } = this.props
+    const { dispatch, index } = this.props
+    const { params } = index
     dispatch({
       type: 'index/fetch',
       payload: {
@@ -92,7 +93,7 @@ class Index extends Component {
         orderType: 0,
         parentId: null,
         pageIndex: 1,
-        pageSize: 10,
+        pageSize: 50,
       },
     })
   }
@@ -137,6 +138,34 @@ class Index extends Component {
 
   handleComplete = () => {
     console.log('加载完成')
+  }
+
+  // 下拉刷新
+  onPullDownRefresh = () => {
+    const { dispatch, index } = this.props
+    const { parmas } = index
+    dispatch({
+      type: 'login/updateState',
+      payload: {
+        params: Object.assign(parmas, { pageIndex: 1 }),
+      },
+    })
+
+    dispatch({
+      type: 'index/fetch',
+      payload: { parmas },
+    }).then(res => {
+      dispatch({
+        type: 'login/updateState',
+        payload: {
+          params: Object.assign(parmas, {
+            pageSize: res.pageSize,
+            projectTotalCount: res.totalCount,
+          }),
+        },
+      })
+      Taro.stopPullDownRefresh()
+    })
   }
 
   render() {

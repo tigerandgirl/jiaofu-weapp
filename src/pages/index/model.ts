@@ -14,16 +14,26 @@ import * as dataServices from '../../services/delivery'
 interface SetAsyncData {
   payload: {
     asyncData: any
+    params: any
   }
 }
 type InitState = {
   asyncData: any[]
+  params: any
 }
 
 const SET_ASYNC_DATA = 'SET_ASYNC_DATA'
 
 const initState: InitState = {
   asyncData: [],
+  params: {
+    text: '',
+    state: 0,
+    orderType: 0,
+    parentId: null,
+    pageIndex: 1,
+    pageSize: 50,
+  },
 }
 
 export default {
@@ -33,10 +43,12 @@ export default {
     *fetch({ payload }, { call, put }: DvaApi) {
       showLoading({ title: 'loading...' })
       let data: any[] = []
+      let resr: any
       try {
         const res = yield call(dataServices.getProjectPageList, payload)
         if (!!res && isArray(res.body)) {
           data = cloneDeep(res.body)
+          resr = cloneDeep(res)
         }
         showToast({
           title: '请求成功',
@@ -56,8 +68,11 @@ export default {
             asyncData: data,
           },
         })
+        hideLoading()
+        return new Promise(resolve => {
+          resolve(resr)
+        })
       }
-      hideLoading()
     },
   },
   reducers: {

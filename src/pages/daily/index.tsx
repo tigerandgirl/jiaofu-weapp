@@ -13,6 +13,7 @@ import moment from 'moment'
 import { TaroVirtualList } from 'taro-virtual-list'
 
 import u1366 from '../../assets/images/u1366.png'
+import notfund from '../../assets/images/notfund.png'
 
 import './style.styl'
 
@@ -222,17 +223,51 @@ class Index extends Component {
     const { dailyList } = daily
     return (
       <View className="data">
-        <TaroVirtualList
-          list={dailyList}
-          onRender={this.renderFunc}
-          onBottom={this.handleBottom}
-          onComplete={this.handleComplete}
-          scrollViewProps={{
-            style: {
-              height: '100vh',
-            },
-          }}
-        />
+        {dailyList.length > 0 ? (
+          <TaroVirtualList
+            list={dailyList}
+            onRender={this.renderFunc}
+            onBottom={this.handleBottom}
+            onComplete={this.handleComplete}
+            scrollViewProps={{
+              style: {
+                height: '100vh',
+              },
+            }}
+          />
+        ) : (
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              minHeight: '100vh',
+            }}
+          >
+            <View
+              className="dpl pr"
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                paddingBottom: '30px',
+                paddingTop: '50px',
+              }}
+            >
+              <Image style="width: 100px;height: 50px;" src={notfund} />
+            </View>
+            <View>
+              <Text
+                style={{
+                  fontSize: '14px',
+                  color: '#8a96a3',
+                  paddingBottom: '30px',
+                }}
+              >
+                暂无数据
+              </Text>
+            </View>
+          </View>
+        )}
         <View className="add-btn">
           <AtButton className="btn" type="primary" onClick={this.goToEditDaily}>
             日报填写

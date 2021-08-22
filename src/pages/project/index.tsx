@@ -73,7 +73,7 @@ class Index extends Component {
         projectId: projectDetail.id,
         type: 0,
         pageIndex: 1,
-        pageSize: 10,
+        pageSize: 50,
       },
     })
     // 查询数据

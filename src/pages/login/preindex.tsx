@@ -97,11 +97,7 @@ class PreIndex extends Component {
   componentDidHide() {}
 
   render() {
-    return (
-      <View className="container">
-        <Text>preindex</Text>
-      </View>
-    )
+    return <View className="container"></View>
   }
 }
 

@@ -380,7 +380,6 @@ class DailyEdit extends Component {
         },
         complete: () => {
           Taro.hideLoading()
-          console.log('uploadfilecomplete')
         },
       })
     })
@@ -389,7 +388,6 @@ class DailyEdit extends Component {
   // 上传
   onFileChange3(v, doType, index) {
     // doType代表操作类型，移除图片和添加图片,index为移除图片时返回的图片下标
-    console.log('v,doType,index', v, doType, index)
     const { dailyDocuments } = this.state
     if (doType === 'remove') {
       this.setState(() => {
@@ -428,11 +426,6 @@ class DailyEdit extends Component {
             return !vItem.fileUrl
           })
 
-          console.log(
-            'oldArray, newArray=================================>',
-            oldArray,
-            newArray
-          )
           let promises = newArray.map((item, index) => {
             return this.getUploadRes(item['url'])
           })
@@ -453,7 +446,6 @@ class DailyEdit extends Component {
                   }
                 )
               })
-              console.log('newArr==========================>', newArr)
               that.setState({
                 dailyDocuments: oldArray.concat(newArr),
               })
@@ -470,12 +462,7 @@ class DailyEdit extends Component {
   // 上传
   onFileChangeDD(v, doType, index) {
     // doType代表操作类型，移除图片和添加图片,index为移除图片时返回的图片下标
-    console.log(
-      'v==========v, doType, index=======================>',
-      v,
-      doType,
-      index
-    )
+
     const { ddDocuments } = this.state
 
     if (doType === 'remove') {
@@ -497,12 +484,9 @@ class DailyEdit extends Component {
         return false
       }
 
-      console.log('v=================================>', v)
-
       // 新增
       this.setState(
         () => {
-          console.log('v====vvvvvvvvvvvvvvvvv=============================>', v)
           return {
             ddDocuments: v,
           }
@@ -510,15 +494,10 @@ class DailyEdit extends Component {
         () => {
           let that = this
           // 已经上传的
-          console.log(
-            'v====已经上传的=============================>',
-            ddDocuments
-          )
           const oldArray = ddDocuments.map(item => {
             return item.fileId
           })
           // 未上传的
-          console.log('v====未上传的=============================>', v)
           const newArray = v.filter(vitem => {
             if (!oldArray.includes(vitem.fileId)) {
               return vitem
@@ -528,10 +507,6 @@ class DailyEdit extends Component {
 
           // 循环上传
           for (let i = 0; i < newArray.length; i++) {
-            console.log(
-              'v====循环上传=============================>',
-              newArray[i]
-            )
             Taro.showLoading({
               title: '上传中...',
               mask: true,
@@ -549,15 +524,8 @@ class DailyEdit extends Component {
                 fileType: 1,
               },
               success: function (res) {
-                console.log(
-                  'resupload================================================================>',
-                  res
-                )
                 const data = JSON.parse(res.data).body
-                console.log(
-                  'resupload================================================================>',
-                  data
-                )
+
                 // 保存附件
                 const attachments =
                   ddDocuments == null
@@ -649,19 +617,12 @@ class DailyEdit extends Component {
             return !vItem.imageDocs
           })
 
-          console.log(
-            'oldArray, newArray=================================>',
-            oldArray,
-            newArray
-          )
           let promises = newArray.map((item, index) => {
             return this.getUploadRes(item['url'])
           })
 
           Promise.all(promises)
             .then(allData => {
-              console.log('allData==========================>', allData)
-
               let newdps = allData.map((item: any) => {
                 return Object.assign(
                   {},
@@ -676,8 +637,7 @@ class DailyEdit extends Component {
                   }
                 )
               })
-              console.log('newArr==========================>', newdps)
-              console.log('ddDocuments==========================>', ddDocuments)
+
               const nowDps = oldArray.concat(newdps)
               const newDailyProjectPhotos = ddDocumentsTmp
                 .map((ddtItem, index) => {
@@ -738,7 +698,6 @@ class DailyEdit extends Component {
   // 上传
   onFileChange2(v, doType, index) {
     // doType代表操作类型，移除图片和添加图片,index为移除图片时返回的图片下标
-    console.log('v,doType,index', v, doType, index)
     const { dailyDocuments } = this.state
     if (doType === 'remove') {
       this.setState(() => {
@@ -809,7 +768,6 @@ class DailyEdit extends Component {
                   id: data[0].id,
                   url: data[0].fileURL,
                 })
-                console.log('xczp=========================>', attachments)
                 that.setState({
                   dailyDocuments: Object.assign(attachments),
                 })

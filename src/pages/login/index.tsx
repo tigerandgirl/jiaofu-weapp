@@ -23,9 +23,8 @@ type PageStateProps = {
   dispatch: Function
   login: any
 }
-type PageOwnProps = {}
 
-type IProps = PageStateProps & PageOwnProps
+type IProps = PageStateProps
 
 interface Index {
   props: IProps
@@ -131,8 +130,8 @@ class Index extends Component {
     })
   }
 
-  gotoRegister() {
-    const { dispatch } = this.props
+  gotoRegister = () => {
+    const { dispatch, login } = this.props
     dispatch({
       type: 'login/updateState',
       payload: {
