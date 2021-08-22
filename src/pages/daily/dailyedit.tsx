@@ -1941,6 +1941,7 @@ class DailyEdit extends Component {
             <View>
               <AtImagePicker
                 length={4}
+                showAddBtn={ddDocuments.length < 4 ? true : false}
                 multiple={true}
                 // onImageClick={this.onImageClick2}
                 files={ddDocuments}
