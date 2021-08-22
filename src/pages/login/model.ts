@@ -146,6 +146,32 @@ export default {
         })
       }
     },
+    *sendVerificationCode({ payload }, { call, put }: DvaApi) {
+      showLoading({ title: 'loading...' })
+      let data: any = {}
+      try {
+        const res = yield call(dataServices.sendVerificationCode, payload)
+        if (!!res) {
+          data = cloneDeep(res)
+        }
+        showToast({
+          title: '请求成功',
+          icon: 'success',
+          duration: 1500,
+        })
+      } catch (e) {
+        showToast({
+          title: '请求失败',
+          icon: 'loading',
+          duration: 1500,
+        })
+      } finally {
+        hideLoading()
+        return new Promise(resolve => {
+          resolve(data)
+        })
+      }
+    },
   },
   reducers: {
     SET_ASYNC_DATA(state: InitState, { payload }: SetAsyncData) {

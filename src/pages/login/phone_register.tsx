@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-// import { connect } from 'react-redux'
+import { connect } from 'react-redux'
 import Taro from '@tarojs/taro'
 import { View, Text, Image } from '@tarojs/components'
 import { AtInput, AtButton } from 'taro-ui'
@@ -17,14 +17,26 @@ import './style.styl'
 //
 // #endregion
 
-type PageStateProps = {}
+type PageStateProps = {
+  dispatch: Function
+  login: any
+}
 type PageOwnProps = {}
+
 type IProps = PageStateProps & PageOwnProps
 
 interface PhoneRegister {
   props: IProps
 }
 
+@connect(
+  state => ({
+    login: state.login,
+  }),
+  dispatch => ({
+    dispatch,
+  })
+)
 class PhoneRegister extends Component {
   constructor(props) {
     super(props)
@@ -42,29 +54,34 @@ class PhoneRegister extends Component {
 
   // 文本改变
   handleChange(type, value) {
-    // GlobalStore[type] = value;
+    const { dispatch } = this.props
+    let obj = {}
+    obj[type] = value
+    dispatch({
+      type: 'login/updateState',
+      payload: {
+        obj,
+      },
+    })
   }
 
   // 获取验证码
   sendSMS = () => {
     let that = this
+    const { dispatch, login } = this.props
     let i = 60
-    let phone = GlobalStore.identifier
+    let phone = login.identifier
     let regex = /^[1][3,4,5,7,8][0-9]{9}$/
     if (regex.test(phone)) {
       this.setState({
         codebtn: true,
       })
 
-      request({
-        type: 'sendVerificationCode',
-        url: Config.wechat.sendVerificationCode,
-        data: {
-          query: Schema.wechat.sendVerificationCode,
-          variables: {
-            openId: GlobalStore.openId,
-            identifier: phone,
-          },
+      dispatch({
+        type: 'login/getPhoneNumber',
+        payload: {
+          openId: login.openId,
+          identifier: phone,
         },
       })
         .then(res => {
@@ -111,14 +128,15 @@ class PhoneRegister extends Component {
 
   // 验证码登录
   submit = () => {
-    if (GlobalStore.identifier == '') {
+    const { dispatch, login } = this.props
+    if (login.identifier == '') {
       Taro.showToast({
         title: '手机号不能为空',
         icon: 'none',
       })
       return
     }
-    if (GlobalStore.code == '') {
+    if (login.code == '') {
       Taro.showToast({
         title: '验证码不能为空',
         icon: 'none',
@@ -126,8 +144,15 @@ class PhoneRegister extends Component {
       return
     }
 
-    // 登录
-    GlobalStore.codeLogin().then(res => {
+    dispatch({
+      type: 'login/codeLogin',
+      payload: {
+        appId: 'wxd8103b355b8df237',
+        openId: login.openId,
+        identifier: login.identifier,
+        code: login.code,
+      },
+    }).then(res => {
       if (Number(res.code) == 1) {
         Taro.showToast({
           title: res.message || '登录成功',
@@ -149,6 +174,8 @@ class PhoneRegister extends Component {
   }
 
   render() {
+    const { login } = this.props
+    const {} = this.state
     return (
       <View className="container">
         <View className="body">
@@ -158,7 +185,7 @@ class PhoneRegister extends Component {
               type="phone"
               maxlength={11}
               placeholder="请输入手机号"
-              // value={GlobalStore.identifier}
+              value={login.identifier}
               onChange={this.handleChange.bind(this, 'identifier')}
             />
           </View>
@@ -167,7 +194,7 @@ class PhoneRegister extends Component {
               name="value2"
               type="number"
               placeholder="请输入验证码"
-              // value={GlobalStore.code}
+              value={login.code}
               onChange={this.handleChange.bind(this, 'code')}
             />
             <AtButton

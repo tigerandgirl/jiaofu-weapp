@@ -39,3 +39,11 @@ export async function logout(params: {}) {
     'logout'
   )
 }
+
+export async function sendVerificationCode(params: {}) {
+  return fetch.post(
+    Config.wechat.sendVerificationCode,
+    { query: Schemas.wechat.sendVerificationCode, variables: params },
+    'sendVerificationCode'
+  )
+}

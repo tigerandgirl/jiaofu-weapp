@@ -21,7 +21,7 @@ import './style.styl'
 
 type PageStateProps = {
   dispatch: Function
-  asyncData: any
+  login: any
 }
 type PageOwnProps = {}
 
@@ -40,9 +40,110 @@ interface Index {
   })
 )
 class Index extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      show: false,
+    }
+  }
+
   componentWillUnmount() {}
   componentDidShow() {}
   componentDidHide() {}
+
+  getnum = e => {
+    const { dispatch, login } = this.props
+    let _this = this
+    if (e.detail.errMsg == 'getPhoneNumber:ok') {
+      // 允许
+      const params = {
+        appId: 'wxd8103b355b8df237',
+        sessionKey: login.sessionKey,
+        encryptedData: e.detail.encryptedData,
+        iv: e.detail.iv,
+      }
+
+      dispatch({
+        type: 'login/getPhoneNumber',
+        payload: params,
+      }).then(res => {
+        console.log(res, '获取手机号')
+        dispatch({
+          type: 'login/updateState',
+          payload: {
+            identifier: res,
+            code: 'WeChatPhoneNumber',
+          },
+        })
+
+        Taro.setStorageSync('identifier', res)
+
+        dispatch({
+          type: 'login/codeLogin',
+          payload: {
+            appId: 'wxd8103b355b8df237',
+            openId: login.openId,
+            identifier: login.identifier,
+            code: login.code,
+          },
+        }).then(res => {
+          if (Number(res.code) == 1) {
+            // 设置用户信息
+            Taro.setStorageSync('userId', res.userInfo.id)
+            Taro.setStorageSync('userName', res.userInfo.realname)
+
+            Taro.showToast({
+              title: res.message || '登录成功',
+              icon: 'none',
+              mask: true,
+            })
+            // 登录成功，跳转到首页
+            Taro.redirectTo({
+              url: '/pages/index/index',
+            })
+            dispatch({
+              type: 'login/updateState',
+              payload: {
+                identifier: '',
+                code: '',
+              },
+            })
+          } else {
+            Taro.showToast({
+              title: res.message || '登录失败',
+              icon: 'none',
+              mask: true,
+            })
+          }
+        })
+      })
+    } else {
+      // 拒绝
+      _this.setState({
+        show: true,
+      })
+    }
+  }
+
+  onClose = () => {
+    this.setState({
+      show: false,
+    })
+  }
+
+  gotoRegister() {
+    const { dispatch } = this.props
+    dispatch({
+      type: 'login/updateState',
+      payload: {
+        identifier: '',
+        code: '',
+      },
+    })
+    Taro.navigateTo({
+      url: '/pages/login/phone_register',
+    })
+  }
 
   render() {
     return (
@@ -55,11 +156,17 @@ class Index extends Component {
             />
           </View>
           数字交付平台
-          <AtButton className="bindPhone" openType="getPhoneNumber">
+          <AtButton
+            className="bindPhone"
+            openType="getPhoneNumber"
+            onGetPhoneNumber={this.getnum}
+          >
             微信用户快捷登录
           </AtButton>
         </View>
-        <View className="register">手机号码登录/注册</View>
+        <View className="register" onClick={this.gotoRegister}>
+          手机号码登录/注册
+        </View>
         <View
           style={{
             marginTop: '100px',
