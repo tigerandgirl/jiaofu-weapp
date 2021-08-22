@@ -1353,6 +1353,70 @@ class DailyEdit extends Component {
       tomorrowContents,
     } = this.state
 
+    if (workersCount <= 0) {
+      Taro.atMessage({
+        message: '工人数量需要填写',
+        type: 'warning',
+      })
+      return false
+    }
+
+    if (workersCount <= 0) {
+      Taro.atMessage({
+        message: '工人数量需要填写',
+        type: 'warning',
+      })
+      return false
+    }
+
+    if (distributionJson === '') {
+      Taro.atMessage({
+        message: '配送进展不能为空',
+        type: 'warning',
+      })
+      return false
+    }
+
+    if (material === '') {
+      Taro.atMessage({
+        message: '进场材料不能为空',
+        type: 'warning',
+      })
+      return false
+    }
+
+    if (todayContents.length === 0) {
+      Taro.atMessage({
+        message: '今日施工内容不能为空',
+        type: 'warning',
+      })
+      return false
+    }
+
+    if (tomorrowMaterial === '') {
+      Taro.atMessage({
+        message: '明日进场材料不能为空',
+        type: 'warning',
+      })
+      return false
+    }
+
+    if (assistance === '') {
+      Taro.atMessage({
+        message: '风险与协助不能为空',
+        type: 'warning',
+      })
+      return false
+    }
+
+    if (summary === '') {
+      Taro.atMessage({
+        message: '施工总结不能为空',
+        type: 'warning',
+      })
+      return false
+    }
+
     if (ddDocuments.length < 4) {
       Taro.atMessage({
         message: '定点照片需要上传4张',
@@ -1997,7 +2061,7 @@ class DailyEdit extends Component {
               <AtTextarea
                 value={this.state.assistance}
                 onChange={this.handleChangeAssistance}
-                placeholder="施工总结"
+                placeholder="风险与协助"
               />
             </View>
 
