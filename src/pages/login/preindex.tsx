@@ -16,7 +16,10 @@ import './style.styl'
 //
 // #endregion
 
-type PageStateProps = {}
+type PageStateProps = {
+  dispatch: Function
+  asyncData: any
+}
 type PageOwnProps = {}
 
 type IProps = PageStateProps & PageOwnProps
@@ -72,12 +75,12 @@ class PreIndex extends Component {
                   code: '',
                 },
               })
-              Taro.navigateTo({
+              Taro.redirectTo({
                 url: '/pages/login/index',
               })
             } else {
               // 用户已登录,直接进入首页
-              Taro.navigateTo({
+              Taro.redirectTo({
                 url: '/pages/index/index',
               })
               Taro.setStorageSync('userId', autores.userInfo.id)

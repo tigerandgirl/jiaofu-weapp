@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-// import { connect } from 'react-redux'
+import { connect } from 'react-redux'
 import Taro from '@tarojs/taro'
 import { View, Text, Image } from '@tarojs/components'
 import { AtButton } from 'taro-ui'
@@ -19,7 +19,10 @@ import './style.styl'
 //
 // #endregion
 
-type PageStateProps = {}
+type PageStateProps = {
+  dispatch: Function
+  asyncData: any
+}
 type PageOwnProps = {}
 
 type IProps = PageStateProps & PageOwnProps
@@ -28,6 +31,14 @@ interface Index {
   props: IProps
 }
 
+@connect(
+  state => ({
+    login: state.login,
+  }),
+  dispatch => ({
+    dispatch,
+  })
+)
 class Index extends Component {
   componentWillUnmount() {}
   componentDidShow() {}

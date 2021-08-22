@@ -3,6 +3,9 @@ import { connect } from 'react-redux'
 import Taro from '@tarojs/taro'
 import { View, Text, Image } from '@tarojs/components'
 import { AtButton, AtDivider } from 'taro-ui'
+
+import Navbar2 from '../../components/navbar/navbar2'
+
 import { TaroVirtualList } from 'taro-virtual-list'
 
 import { styled } from 'linaria/react'
@@ -42,6 +45,10 @@ interface Index {
 class Index extends Component {
   constructor(props) {
     super(props)
+    this.state = {
+      statusBarHeight: 20,
+      toBar: 44,
+    }
   }
 
   // componentWillReceiveProps(nextProps) {
@@ -51,7 +58,28 @@ class Index extends Component {
   componentDidShow() {}
   componentDidHide() {}
   componentDidMount() {
+    this.getSystemInfo()
     this.getProjectPageList()
+  }
+
+  getSystemInfo = () => {
+    let that = this
+    Taro.getSystemInfo({}).then(res => {
+      this.setState({ statusBarHeight: res.statusBarHeight || 20 })
+      if (res.platform == 'ios') {
+        that.setState({
+          toBar: 44,
+        })
+      } else if (res.platform == 'android') {
+        that.setState({
+          toBar: 48,
+        })
+      } else {
+        that.setState({
+          toBar: 44,
+        })
+      }
+    })
   }
 
   getProjectPageList = () => {
@@ -113,9 +141,13 @@ class Index extends Component {
 
   render() {
     const { index } = this.props
+    const { statusBarHeight, toBar } = this.state
     const { asyncData } = index
     return (
       <View className="index">
+        <View style={{ marginBottom: `${statusBarHeight + toBar}px` }}>
+          <Navbar2 title={'智建交付'} />
+        </View>
         <TaroVirtualList
           list={asyncData}
           onRender={this.renderFunc}
