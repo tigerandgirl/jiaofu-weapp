@@ -1,14 +1,13 @@
 export default {
   pages: [
+    'pages/login/preindex',
+    'pages/login/index',
+    'pages/login/phone_register',
     'pages/index/index',
     'pages/project/index',
     'pages/daily/index',
     'pages/daily/dailyview',
     'pages/daily/dailyedit',
-    'pages/counter/index',
-    'pages/data/index',
-    'pages/map/index',
-    'pages/login/index',
   ],
   window: {
     backgroundTextStyle: 'dark',

@@ -1781,7 +1781,7 @@ class DailyEdit extends Component {
                       <Text className="title">工人</Text>
                       <AtInput
                         border={false}
-                        type="text"
+                        type="number"
                         value={this.state.workersCount}
                         onChange={this.handleChangeWorkersCount}
                       />
@@ -2226,8 +2226,8 @@ class DailyEdit extends Component {
             <View style={{ width: '90%' }}>
               <AtInput
                 name="progressValueInput"
-                type="text"
-                placeholder="手动输入内容"
+                type="number"
+                placeholder="请输入数字"
                 value={progressValue}
                 onChange={this.handleChangeProgress}
               />

@@ -2,8 +2,7 @@ import React, { Component } from 'react'
 // import { connect } from 'react-redux'
 import Taro from '@tarojs/taro'
 import { View, Text, Image } from '@tarojs/components'
-import { AtButton, AtDivider } from 'taro-ui'
-import { styled } from 'linaria/react'
+import { AtButton } from 'taro-ui'
 
 import bocLogo from '../../assets/images/bocLogo.png'
 
@@ -22,45 +21,14 @@ import './style.styl'
 
 type PageStateProps = {}
 type PageOwnProps = {}
-type PageState = {}
+
 type IProps = PageStateProps & PageOwnProps
 
 interface Index {
   props: IProps
 }
 
-const BtnGroup = styled(View)<{
-  color: string
-}>`
-  color: ${props => props.color};
-  background-color: #999;
-  > .at-button--small {
-    display: inline-block;
-    margin: 10%;
-  }
-`
-
-// @connect(
-//   ({ counter }) => ({
-//     counter,
-//   }),
-//   dispatch => ({
-//     add() {
-//       dispatch(add())
-//     },
-//     dec() {
-//       dispatch(minus())
-//     },
-//     asyncAdd() {
-//       dispatch(asyncAdd())
-//     },
-//   })
-// )
 class Index extends Component {
-  // componentWillReceiveProps(nextProps) {
-  //   console.log(this.props, nextProps)
-  // }
-
   componentWillUnmount() {}
   componentDidShow() {}
   componentDidHide() {}
