@@ -1,9 +1,3 @@
-/*
- * @Author: qiufh
- * @Date: 2020-09-14 19:44:38
- * @Last Modified by: yanxiaodi
- * @Last Modified time: 2020-09-17 18:12:39
- */
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import Taro from '@tarojs/taro'
@@ -1464,8 +1458,12 @@ class DailyEdit extends Component {
         summaryShare: summaryShare,
         assistance: assistance,
         contentRemarks: contentRemarks,
+
+        createUser: Taro.getStorageSync('userId'),
+        createUserName: Taro.getStorageSync('userName'),
       }
     )
+
     if (dailyDetail.id !== null) {
       newDaily = Object.assign(dailyDetail, newDaily)
     }

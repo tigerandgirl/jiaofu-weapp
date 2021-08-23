@@ -1,9 +1,3 @@
-/*
- * @Author: qiufh
- * @Date: 2020-09-14 19:44:38
- * @Last Modified by: qiufh
- * @Last Modified time: 2020-09-17 18:12:39
- */
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import Taro from '@tarojs/taro'

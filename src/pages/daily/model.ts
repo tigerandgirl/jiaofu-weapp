@@ -1,9 +1,3 @@
-/*
- * @Author: yanxiaodi
- * @Date: 2020-09-15 17:29:33
- * @Last Modified by: yanxiaodi
- * @Last Modified time: 2020-09-17 18:08:30
- */
 import { showLoading, showToast, hideLoading } from '@tarojs/taro'
 import cloneDeep from 'lodash/cloneDeep'
 import assign from 'lodash/assign'

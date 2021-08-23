@@ -1,14 +1,8 @@
-/*
- * @Author: qiufh
- * @Date: 2020-09-14 19:44:38
- * @Last Modified by: qiufh
- * @Last Modified time: 2020-09-17 18:12:39
- */
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import Taro from '@tarojs/taro'
 import { View, Text, Image } from '@tarojs/components'
-import { AtButton, AtList, AtListItem, AtCard } from 'taro-ui'
+import { AtButton } from 'taro-ui'
 import moment from 'moment'
 import { TaroVirtualList } from 'taro-virtual-list'
 
@@ -124,7 +118,9 @@ class Index extends Component {
               <Image
                 className="home_img"
                 style="width: 130px;min-width:130px;height: 80px"
-                src={u1366}
+                src={
+                  'cloud://cloud1-2ge3hz6823947d41.636c-cloud1-2ge3hz6823947d41-1306866431/img/u1366.png'
+                }
               />
             )}
             <View className="daily-desc" style={{ width: '100%' }}>
@@ -253,7 +249,12 @@ class Index extends Component {
                 paddingTop: '50px',
               }}
             >
-              <Image style="width: 100px;height: 50px;" src={notfund} />
+              <Image
+                style="width: 100px;height: 50px;"
+                src={
+                  'cloud://cloud1-2ge3hz6823947d41.636c-cloud1-2ge3hz6823947d41-1306866431/img/bocLogo.png'
+                }
+              />
             </View>
             <View>
               <Text

@@ -1,9 +1,3 @@
-/*
- * @Author: qiufh
- * @Date: 2020-09-14 19:44:38
- * @Last Modified by: qiufh
- * @Last Modified time: 2020-09-17 18:12:39
- */
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import Taro from '@tarojs/taro'
@@ -60,16 +54,7 @@ class DailyView extends Component {
       selectorWeather: ['晴', '雨', '雪', '大风', '雾'],
       selectorWeatherChecked: '晴',
       workerNum: 0,
-      files: [
-        {
-          url:
-            'https://xinlj.oss-cn-beijing.aliyuncs.com/20210811/rc-upload-1628689757650-5/刺客信条：奥德赛2020-5-5-0-6-37.jpg',
-        },
-        {
-          url:
-            'https://xinlj.oss-cn-beijing.aliyuncs.com/20210811/rc-upload-1628689757650-7/刺客信条：奥德赛2020-5-5-0-6-39.jpg',
-        },
-      ],
+      files: [],
     }
   }
 
@@ -173,36 +158,7 @@ class DailyView extends Component {
 
     let dds: any = []
 
-    //获取后缀
-    // function getExt(filePath) {
-    // 	// 去掉url的问号
-    // 	if (filePath.indexOf("?") !=-1) {
-    // 		filePath = filePath.split("?")[0];
-    // 	}
-    // 	//获取最后一个.的位置
-    // 	let index = filePath.lastIndexOf(".");
-    // 	//获取后缀
-    // 	let ext = filePath.substr(index + 1);
-    // 	return ext;
-    // }
-
     if (!!dailyDetail.dailyDocuments && isArray(dailyDetail.dailyDocuments)) {
-      // dailyDocuments = dds.map((item, index)=>{
-      //   if(item){
-      //     // let isVideo = /(avi|dat|mpg|wmv|asf|rm|rmvb|mov|flv|mp4|3gp|dv|divx|qt|asx)$/.test(getExt(item.fileUrl))
-      // 		return Object.assign({}, {
-      // 			"fileId":null,
-      // 			"fileName":item.fileUrl,
-      // 			"filePath":item.fileUrl,
-      // 			"id":"",
-      // 			"name":item.name,
-      // 			"status":"done",
-      // 			"uid":uuidv4(),
-      // 			"url": item.fileUrl
-      // 		})
-      //   }
-      // })
-
       dds = dailyDetail.dailyDocuments
         .map((item, index) => {
           return Object.assign({}, { url: item.fileUrl, key: index })

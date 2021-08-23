@@ -2,26 +2,12 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import Taro from '@tarojs/taro'
 import { View, Text, Image } from '@tarojs/components'
-import { AtButton, AtDivider } from 'taro-ui'
 
 import Navbar2 from '../../components/navbar/navbar2'
 
 import { TaroVirtualList } from 'taro-virtual-list'
 
-import { styled } from 'linaria/react'
-
-import dxk from '../../assets/images/dxk.jpg'
 import './style.styl'
-
-// #region 书写注意
-//
-// 目前 typescript 版本还无法在装饰器模式下将 Props 注入到 Taro.Component 中的 props 属性
-// 需要显示声明 connect 的参数类型并通过 interface 的方式指定 Taro.Component 子类的 props
-// 这样才能完成类型检查和 IDE 的自动提示
-// 使用函数模式则无此限制
-// ref: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/20796
-//
-// #endregion
 
 type PageStateProps = {
   dispatch: Function
@@ -51,9 +37,6 @@ class Index extends Component {
     }
   }
 
-  // componentWillReceiveProps(nextProps) {
-  //   console.log(this.props, nextProps)
-  // }
   componentWillUnmount() {}
   componentDidShow() {}
   componentDidHide() {}
@@ -123,7 +106,11 @@ class Index extends Component {
         <Image
           className="home_img"
           style="width: 100%;height: 140px; "
-          src={item.mainPhoto !== null ? item.mainPhoto : dxk}
+          src={
+            item.mainPhoto !== null
+              ? item.mainPhoto
+              : 'cloud://cloud1-2ge3hz6823947d41.636c-cloud1-2ge3hz6823947d41-1306866431/img/dxk.jpg'
+          }
         />
         <View className="home_title">
           <Text>{item.name}</Text>

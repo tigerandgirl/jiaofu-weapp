@@ -4,8 +4,6 @@ import Taro from '@tarojs/taro'
 import { View, Text, Image } from '@tarojs/components'
 import { AtButton } from 'taro-ui'
 
-import bocLogo from '../../assets/images/bocLogo.png'
-
 import './index.less'
 import './style.styl'
 
@@ -151,7 +149,9 @@ class Index extends Component {
           <View className="header">
             <Image
               style="width: 63px;height: 63px;border-radius: 50%;overflow:hidden;"
-              src={bocLogo}
+              src={
+                'cloud://cloud1-2ge3hz6823947d41.636c-cloud1-2ge3hz6823947d41-1306866431/img/bocLogo.png'
+              }
             />
           </View>
           数字交付平台

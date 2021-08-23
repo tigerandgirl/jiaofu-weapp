@@ -8,8 +8,5 @@ const login = require('../pages/login/model').default
 const index = require('../pages/index/model').default
 const project = require('../pages/project/model').default
 const daily = require('../pages/daily/model').default
-const counter = require('../pages/counter/model').default
-const data = require('../pages/data/model').default
-const map = require('../pages/map/model').default
 
-export default [login, index, project, daily, counter, data, map]
+export default [login, index, project, daily]
