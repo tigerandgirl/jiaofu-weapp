@@ -6,7 +6,9 @@
  */
 const login = require('../pages/login/model').default
 const index = require('../pages/index/model').default
-const project = require('../pages/project/model').default
-const daily = require('../pages/daily/model').default
+const project = require('../packageD/pages/project/model').default
+const daily = require('../packageC/pages/daily/model').default
+const stakeholder = require('../packageB/pages/stakeholder/model').default
+const safetycontent = require('../packageA/pages/safetycontent/model').default
 
-export default [login, index, project, daily]
+export default [login, index, project, daily, stakeholder, safetycontent]

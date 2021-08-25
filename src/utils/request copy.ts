@@ -25,7 +25,7 @@ type Params = {
 }
 
 class fetch {
-  baseOptions(params, method: Params['method'] = 'GET', type) {
+  baseOptions(params, method: Params['method'] = 'GET') {
     let { url, data } = params
     const BASE_URL = getBaseUrl(url)
     let contentType = 'application/json'
@@ -34,18 +34,29 @@ class fetch {
       url: `${BASE_URL}${url}`,
       data,
       method,
-      type: type,
       header: {
         'content-type': contentType,
-        Cookie: getStorageSync('autoresSession'),
+        Authorization: getStorageSync('Authorization'),
       },
     }
     return request(option)
   }
 
-  post(url: string, data: any, type: string) {
-    let params = { url, data }
-    return this.baseOptions(params, 'POST', type)
+  get(url: string, data) {
+    let option = { url, data }
+    return this.baseOptions(option)
+  }
+  post(url: string, data, contentType) {
+    let params = { url, data, contentType }
+    return this.baseOptions(params, 'POST')
+  }
+  put(url: string, data) {
+    let option = { url, data }
+    return this.baseOptions(option, 'PUT')
+  }
+  delete(url: string, data) {
+    let option = { url, data }
+    return this.baseOptions(option, 'DELETE')
   }
 }
 

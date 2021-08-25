@@ -42,7 +42,7 @@ class Index extends Component {
   componentDidHide() {}
   componentDidMount() {
     this.getSystemInfo()
-    this.getProjectPageList()
+    this.getProjectPageList2()
   }
 
   getSystemInfo = () => {
@@ -65,12 +65,13 @@ class Index extends Component {
     })
   }
 
-  getProjectPageList = () => {
+  getProjectPageList2 = () => {
     const { dispatch, index } = this.props
     const { params } = index
     dispatch({
-      type: 'index/fetch',
+      type: 'index/getProjectPageList2',
       payload: {
+        userId: Taro.getStorageSync('userId'),
         text: '',
         state: 0,
         orderType: 0,
@@ -89,7 +90,7 @@ class Index extends Component {
     }).then(res => {
       // 查询数据
       Taro.navigateTo({
-        url: '/pages/project/index',
+        url: '/packageD/pages/project/index',
       })
     })
   }
@@ -109,7 +110,7 @@ class Index extends Component {
           src={
             item.mainPhoto !== null
               ? item.mainPhoto
-              : 'cloud://cloud1-2ge3hz6823947d41.636c-cloud1-2ge3hz6823947d41-1306866431/img/dxk.jpg'
+              : 'https://xinlj.oss-cn-beijing.aliyuncs.com/wechat/dxk.jpg'
           }
         />
         <View className="home_title">
@@ -120,11 +121,11 @@ class Index extends Component {
   }
 
   handleBottom = () => {
-    console.log('触底了')
+    //console.log('触底了')
   }
 
   handleComplete = () => {
-    console.log('加载完成')
+    //console.log('加载完成')
   }
 
   // 下拉刷新

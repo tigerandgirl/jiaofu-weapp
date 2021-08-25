@@ -28,7 +28,7 @@
     ]
   },
   "scripts": {
-    "build:weapp": "taro build --type weapp",
+    "build:weapp": "taro build --type weapp --minimize",
     "build:swan": "taro build --type swan",
     "build:alipay": "taro build --type alipay",
     "build:tt": "taro build --type tt",
@@ -37,7 +37,7 @@
     "build:qq": "taro build --type qq",
     "build:jd": "taro build --type jd",
     "build:quickapp": "taro build --type quickapp",
-    "dev:weapp": "npm run build:weapp -- --watch",
+    "dev:weapp": "npm run build:weapp -- --watch --minimize",
     "dev:swan": "npm run build:swan -- --watch",
     "dev:alipay": "npm run build:alipay -- --watch",
     "dev:tt": "npm run build:tt -- --watch",
@@ -61,6 +61,7 @@
     "@tarojs/react": "3.0.0-rc.6",
     "@tarojs/runtime": "3.0.0-rc.6",
     "@tarojs/taro": "3.0.0-rc.6",
+    "@yz1311/taro-signature-pad": "^0.0.1",
     "dva-core": "^2.0.2",
     "dva-immer": "^0.4.19",
     "dva-model-extend": "^0.1.2",
@@ -100,6 +101,7 @@
     "eslint-plugin-react-hooks": "^1.6.1",
     "husky": "^4.3.0",
     "lint-staged": "^10.3.0",
+    "node-sass": "^6.0.1",
     "prettier": "^2.1.1",
     "standard-version": "^9.0.0",
     "stylelint": "9.3.0",

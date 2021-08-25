@@ -54,6 +54,10 @@ class PreIndex extends Component {
             type: 'login/autoLogin',
             payload: { appid: 'wxd8103b355b8df237', code: loginRes.code },
           }).then(autores => {
+            Taro.setStorageSync(
+              'autoresSession',
+              'SESSION=' + autores.sessionId
+            )
             dispatch({
               type: 'login/updateState',
               payload: {

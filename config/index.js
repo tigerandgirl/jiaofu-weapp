@@ -9,7 +9,17 @@ const config = {
   },
   sourceRoot: 'src',
   outputRoot: 'dist',
-  plugins: [],
+  plugins: [
+    {
+      //设置打包过程中的 JS 代码压缩
+      uglify: {
+        enable: true,
+        config: {
+          // 配置项同 https://github.com/mishoo/UglifyJS2#minify-options
+        }
+      },
+    },
+  ],
   defineConstants: {},
   copy: {
     patterns: [],
@@ -43,7 +53,7 @@ const config = {
         .use('linariaLoader')
         .loader('linaria/loader')
         .options({
-          sourceMap: process.env.NODE_ENV !== 'production',
+          sourceMap: false,
         })
     },
   },

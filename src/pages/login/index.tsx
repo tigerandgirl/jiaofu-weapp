@@ -80,8 +80,8 @@ class Index extends Component {
           payload: {
             appId: 'wxd8103b355b8df237',
             openId: login.openId,
-            identifier: login.identifier,
-            code: login.code,
+            identifier: res,
+            code: 'WeChatPhoneNumber',
           },
         }).then(res => {
           if (Number(res.code) == 1) {
@@ -150,7 +150,7 @@ class Index extends Component {
             <Image
               style="width: 63px;height: 63px;border-radius: 50%;overflow:hidden;"
               src={
-                'cloud://cloud1-2ge3hz6823947d41.636c-cloud1-2ge3hz6823947d41-1306866431/img/bocLogo.png'
+                'https://xinlj.oss-cn-beijing.aliyuncs.com/wechat/bocLogo.png'
               }
             />
           </View>

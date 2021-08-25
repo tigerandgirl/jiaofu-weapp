@@ -74,6 +74,40 @@ export default {
         })
       }
     },
+    *getProjectPageList2({ payload }, { call, put }: DvaApi) {
+      showLoading({ title: 'loading...' })
+      let data: any[] = []
+      let resr: any
+      try {
+        const res = yield call(dataServices.getProjectPageList2, payload)
+        if (!!res && isArray(res.body)) {
+          data = cloneDeep(res.body)
+          resr = cloneDeep(res)
+        }
+        showToast({
+          title: '请求成功',
+          icon: 'success',
+          duration: 1500,
+        })
+      } catch (e) {
+        showToast({
+          title: '请求失败',
+          icon: 'loading',
+          duration: 1500,
+        })
+      } finally {
+        yield put({
+          type: SET_ASYNC_DATA,
+          payload: {
+            asyncData: data,
+          },
+        })
+        hideLoading()
+        return new Promise(resolve => {
+          resolve(resr)
+        })
+      }
+    },
   },
   reducers: {
     SET_ASYNC_DATA(state: InitState, { payload }: SetAsyncData) {

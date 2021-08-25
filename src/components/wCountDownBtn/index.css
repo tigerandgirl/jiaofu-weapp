@@ -1,0 +1,28 @@
+.normal {
+    background: rgba(246, 246, 246, 1);
+    width: 219px;
+    height: 76px;
+    line-height: 76px;
+    border-radius: 10px;
+    border: 2px solid rgba(63, 67, 70, 1);
+    font-size: 28px;
+    font-weight: 400;
+    color: rgba(27, 27, 27, 1);
+    text-align: center;
+  }
+  .disabled {
+    background: rgba(246, 246, 246, 1);
+    width: 219px;
+    height: 76px;
+    line-height: 76px;
+    border-radius: 10px;
+    font-size: 28px;
+    font-weight: 400;
+    text-align: center;
+    color: rgba(127, 127, 127, 1);
+    border-color: rgba(127, 127, 127, 1);
+  }
+  .box{
+      display: flex;
+      justify-content: center;
+  }
